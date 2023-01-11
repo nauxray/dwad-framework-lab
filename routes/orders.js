@@ -2,8 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const { Order } = require("../models");
+const { checkIfAuthenticated } = require("../middlewares");
 
-router.get("/", async (req, res) => {
+router.get("/", checkIfAuthenticated, async (req, res) => {
   try {
     const orders = (await Order.collection().fetch()).toJSON();
     res.send(orders);

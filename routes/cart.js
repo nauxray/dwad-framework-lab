@@ -1,8 +1,10 @@
 const express = require("express");
-const { CartItem } = require("../models");
 const router = express.Router();
 
-router.get("/:id", async (req, res) => {
+const { CartItem } = require("../models");
+const { checkIfAuthenticated } = require("../middlewares");
+
+router.get("/:id", checkIfAuthenticated, async (req, res) => {
   try {
     const cart = await CartItem.query({
       where: { user_id: req.params.id },

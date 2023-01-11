@@ -10,6 +10,7 @@ const router = express.Router();
 const { User } = require("../models");
 const { getUserById } = require("../services/users");
 const { getHashedPassword } = require("../utils/getHashedPw");
+const { checkIfAuthenticated } = require("../middlewares");
 
 // router.get("/", async (req, res) => {
 //   try {
@@ -21,7 +22,7 @@ const { getHashedPassword } = require("../utils/getHashedPw");
 //   }
 // });
 
-router.get("/:id/profile", async (req, res) => {
+router.get("/:id/profile", checkIfAuthenticated, async (req, res) => {
   try {
     const user = (await getUserById(req.params.id))?.[0];
     res.send(user);
@@ -30,10 +31,9 @@ router.get("/:id/profile", async (req, res) => {
   }
 });
 
-router.get("/:id/profile/view", async (req, res) => {
+router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
   try {
     const userInfo = (await getUserById(req.params.id))?.[0];
-    console.log(userInfo);
     if (userInfo) res.render("users/profile", { userInfo });
     else res.render("users/login");
   } catch (err) {
@@ -42,7 +42,7 @@ router.get("/:id/profile/view", async (req, res) => {
 });
 
 // todo
-router.put("/:id/edit", async (req, res) => {
+router.put("/:id/edit", checkIfAuthenticated,async (req, res) => {
   try {
     const signUpForm = createSignUpForm();
     signUpForm.handle(req, {
