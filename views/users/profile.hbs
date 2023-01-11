@@ -1,0 +1,39 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    <div class="d-flex align-items-center" style="gap: 1rem;">
+      <img
+        src={{userInfo.pfp}}
+        class="rounded"
+        style="width: 100px; height:100px; border: 2px solid #BBAEC6;"
+      />
+      <h2>Your Profile</h2>
+    </div>
+    <div>
+
+      <p class="">
+        Shop Name:
+        {{userInfo.username}}
+      </p>
+      <p class="">
+        Email:
+        {{userInfo.email}}
+      </p>
+      <p class="">Password: ********</p>
+      <p class="">
+        Feature duration:
+        {{userInfo.shop_featured}}
+      </p>
+      <p class="">
+        Joined at:
+        {{userInfo.created_at}}
+      </p>
+      <p class="">
+        Bio:
+        {{userInfo.shop_bio}}
+      </p>
+
+    </div>
+  {{/block}}
+
+{{/extends}}
