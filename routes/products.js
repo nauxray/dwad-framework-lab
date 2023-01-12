@@ -42,10 +42,32 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const products = await Product.query()
-      .where({ id: req.params.id })
-      .select();
-    res.send(products);
+    const products = await Product.query({
+      where: { id: req.params.id },
+    }).fetch({
+      withRelated: [
+        "brand",
+        "series",
+        "tags",
+        "materials",
+        {
+          shop: (query) => {
+            query
+              .join("users", "users.id", "=", "shop.user_id")
+              .select(
+                "shop.id",
+                "shop.shop_bio",
+                "users.username",
+                "users.pfp",
+                "users.role",
+                "users.email"
+              );
+          },
+        },
+      ],
+      require: true,
+    });
+    res.send(products.toJSON());
   } catch (err) {
     res.sendStatus(500);
   }
