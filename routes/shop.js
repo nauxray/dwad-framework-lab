@@ -10,18 +10,17 @@ router.get("/featured", async (req, res) => {
     const featuredShops = await Shop.query({
       where: ["shop_featured", ">", 0],
       limit: 5,
-    }).fetch({
+    }).fetchAll({
       withRelated: {
         user: (query) => {
           query.select(["id", "username", "created_at", "pfp"]);
         },
       },
-      require: true,
+      require: false,
     });
 
     res.send(featuredShops.toJSON());
   } catch (err) {
-    if (err?.message === "EmptyResponse") res.status(404).send([]);
     res.sendStatus(500);
   }
 });
