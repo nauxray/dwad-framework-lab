@@ -1,6 +1,7 @@
 const express = require("express");
 const hbs = require("hbs");
 const wax = require("wax-on");
+const cors = require("cors");
 const session = require("express-session");
 const flash = require("connect-flash");
 const FileStore = require("session-file-store")(session);
@@ -31,6 +32,7 @@ app.use(
 
 app.use(flash());
 app.use(csrf());
+app.use(cors());
 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash("success_messages");

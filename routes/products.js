@@ -8,40 +8,33 @@ router.get("/", async (req, res) => {
     const reqQuery = req.query;
     const queryKeys = Object.keys(reqQuery);
 
-    let products = Product.query()
-      .join("brands", "brands.id", "=", "products.brand_id")
-      .join("series", "series.id", "=", "products.series_id");
-
-    if (queryKeys.includes("name")) {
-      products = products.whereILike("name", `%${reqQuery.name}%`);
-    }
-    if (queryKeys.includes("quantity") && parseInt(reqQuery.quantity)) {
-      products = products.andWhere(
-        "quantity",
-        ">=",
-        parseInt(reqQuery.quantity)
-      );
-    }
-    if (queryKeys.includes("minPrice") && parseInt(reqQuery.minPrice)) {
-      products = products.andWhere("price", ">=", parseInt(reqQuery.minPrice));
-    }
-    if (queryKeys.includes("maxPrice") && parseInt(reqQuery.maxPrice)) {
-      products = products.andWhere("price", "<=", parseInt(reqQuery.maxPrice));
-    }
-    if (queryKeys.includes("limit") && parseInt(reqQuery.limit)) {
-      products = products.limit(parseInt(reqQuery.limit));
-    }
-    if (
-      queryKeys.includes("sortBy") &&
-      reqQuery.sortBy.split(":").length === 2
-    ) {
-      products = products.orderBy(
-        reqQuery.sortBy.split(":")[0],
-        reqQuery.sortBy.split(":")[1]
-      );
-    }
-    products = await products.select();
-    res.send(products);
+    let products = await Product.query((qb) => {
+      if (queryKeys.includes("name")) {
+        qb.whereILike("name", `%${reqQuery.name}%`);
+      }
+      if (queryKeys.includes("quantity") && parseInt(reqQuery.quantity)) {
+        qb.andWhere("quantity", ">=", parseInt(reqQuery.quantity));
+      }
+      if (queryKeys.includes("minPrice") && parseInt(reqQuery.minPrice)) {
+        qb.andWhere("price", ">=", parseInt(reqQuery.minPrice));
+      }
+      if (queryKeys.includes("maxPrice") && parseInt(reqQuery.maxPrice)) {
+        qb.andWhere("price", "<=", parseInt(reqQuery.maxPrice));
+      }
+      if (queryKeys.includes("limit") && parseInt(reqQuery.limit)) {
+        qb.limit(parseInt(reqQuery.limit));
+      }
+      if (
+        queryKeys.includes("sortBy") &&
+        reqQuery.sortBy.split(":").length === 2
+      ) {
+        qb.orderBy(
+          reqQuery.sortBy.split(":")[0],
+          reqQuery.sortBy.split(":")[1]
+        );
+      }
+    }).fetchAll({ withRelated: ["brand", "series"], required: false });
+    res.send(products.toJSON());
   } catch (err) {
     res.sendStatus(500);
   }
