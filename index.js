@@ -35,7 +35,14 @@ app.use(
 );
 
 app.use(flash());
-app.use(csrf());
+
+const csrfInstance = csrf();
+app.use(function (req, res, next) {
+  if (req.url === "/checkout/process_payment" || req.url.startsWith("/api/")) {
+    return next();
+  }
+  csrfInstance(req, res, next);
+});
 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash("success_messages");
@@ -58,28 +65,33 @@ app.use((err, req, res, next) => {
   }
 });
 
+const api = {
+  users: require("./routes/api/users"),
+  products: require("./routes/api/products"),
+  cart: require("./routes/api/cart"),
+  shop: require("./routes/api/shop"),
+};
+
 const landingRoutes = require("./routes/landing");
-const productRoutes = require("./routes/products");
 const brandRoutes = require("./routes/brands");
 const materialRoutes = require("./routes/materials");
 const orderRoutes = require("./routes/orders");
 const seriesRoutes = require("./routes/series");
 const tagsRoutes = require("./routes/tags");
 const userRoutes = require("./routes/users");
-const shopRoutes = require("./routes/shop");
-const cartRoutes = require("./routes/cart");
 
 async function main() {
   app.use("/", landingRoutes);
-  app.use("/products", productRoutes);
   app.use("/brands", brandRoutes);
   app.use("/materials", materialRoutes);
   app.use("/orders", orderRoutes);
   app.use("/series", seriesRoutes);
   app.use("/tags", tagsRoutes);
   app.use("/users", userRoutes);
-  app.use("/shop", shopRoutes);
-  app.use("/cart", cartRoutes);
+
+  Object.keys(api).map((route) => {
+    app.use(`/api/${route}`, api[route]);
+  });
 }
 
 main();

@@ -3,26 +3,26 @@ const {
   createLoginForm,
   createSignUpForm,
   bootstrapField,
-} = require("../forms");
+  createEditProfileForm,
+} = require("../../forms");
 const router = express.Router();
 
-const { User } = require("../models");
-const { getUserById, handleLoginForm } = require("../services/users");
-const { getHashedPassword } = require("../utils/getHashedPw");
-const { checkIfAuthenticated } = require("../middlewares");
+const { User } = require("../../models");
+const { getUserById, handleLoginForm } = require("../../services/users");
+const { getHashedPassword } = require("../../utils/getHashedPw");
+const { generateAccessToken } = require("../../utils/jwtUtils");
 
-router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
+router.get("/:id/profile", async (req, res) => {
   try {
-    const userInfo = (await getUserById(req.params.id))?.[0];
-    if (userInfo) res.render("users/profile", { userInfo });
-    else res.render("users/login");
+    const user = (await getUserById(req.params.id))?.[0];
+    res.send(user);
   } catch (err) {
     res.sendStatus(500);
   }
 });
 
 // todo
-router.put("/:id/edit", checkIfAuthenticated, async (req, res) => {
+router.put("/:id/edit", async (req, res) => {
   try {
     const signUpForm = createSignUpForm();
     signUpForm.handle(req, {
@@ -55,59 +55,25 @@ router.put("/:id/edit", checkIfAuthenticated, async (req, res) => {
   }
 });
 
-router.get("/login", async (req, res) => {
-  try {
-    if (req.session?.user) {
-      return res.redirect("/");
-    }
-    const loginForm = createLoginForm();
-    res.render("users/login", {
-      form: loginForm.toHTML(bootstrapField),
-    });
-  } catch (err) {
-    res.sendStatus(500);
-  }
-});
-
 router.post("/login", handleLoginForm, async (req, res) => {
   try {
-    switch (res.locals.status) {
-      case "success":
-        req.flash("success_messages", "Login successful!");
-        res.redirect("/");
-        break;
-      case "wrongCredentials":
-        req.flash("error_messages", "Your login credentials is invalid");
-        res.redirect("/users/login");
-        break;
-      case "error":
-      case "empty":
-        res.render("users/login", {
-          form: res.locals.form,
-        });
-        break;
+    console.log("status", res.locals.status);
+    if (res.locals.status === "success") {
+      res.status(200).send({
+        user: req.session.user,
+        token: generateAccessToken(req.session.user.id),
+      });
+    } else {
+      res.status(400).send({ error: "Invalid Credentials" });
     }
   } catch (err) {
-    req.flash("error_messages", "Something went wrong!");
-    res.redirect("/");
+    res.sendStatus(500);
   }
 });
 
 router.get("/logout", (req, res) => {
   req.session.user = null;
-  req.flash("success_messages", "Logged out");
-  res.redirect("/");
-});
-
-router.get("/create", async (req, res) => {
-  try {
-    const signUpForm = createSignUpForm();
-    res.render("users/create", {
-      form: signUpForm.toHTML(bootstrapField),
-    });
-  } catch (err) {
-    res.sendStatus(500);
-  }
+  res.status(200).send({});
 });
 
 router.post("/create", async (req, res) => {
