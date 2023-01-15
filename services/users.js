@@ -5,6 +5,7 @@ const getUserById = async (id) => {
     .join("shop", "shop.user_id", "=", "users.id")
     .where({ "users.id": id })
     .select([
+      "users.id",
       "users.username",
       "users.email",
       "users.role",

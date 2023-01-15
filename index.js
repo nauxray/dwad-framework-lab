@@ -8,6 +8,8 @@ const FileStore = require("session-file-store")(session);
 const csrf = require("csurf");
 require("dotenv").config();
 
+const port = process.env.PORT || 8080;
+
 const app = express();
 app.set("view engine", "hbs");
 app.use(express.static("public"));
@@ -21,6 +23,8 @@ app.use(
   })
 );
 
+app.use(cors());
+
 app.use(
   session({
     store: new FileStore(),
@@ -32,7 +36,6 @@ app.use(
 
 app.use(flash());
 app.use(csrf());
-app.use(cors());
 
 app.use((req, res, next) => {
   res.locals.success_messages = req.flash("success_messages");
@@ -81,6 +84,6 @@ async function main() {
 
 main();
 
-app.listen(3000, () => {
+app.listen(port, () => {
   console.log("Server has started");
 });
