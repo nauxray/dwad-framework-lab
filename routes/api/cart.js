@@ -56,7 +56,24 @@ router.post("/add/:id", authenticateToken, async (req, res) => {
 
     res.status(201).send({ createdItemId: result.id });
   } catch (err) {
-    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+router.delete("/remove/:id", authenticateToken, async (req, res) => {
+  try {
+    const user_id = req.user.userId;
+    await CartItem.where({
+      product_id: req.params.id,
+      user_id,
+    })
+      .fetchAll()
+      .map(async (item) => {
+        await item.destroy();
+      });
+
+    res.status(204).send({});
+  } catch (err) {
     res.sendStatus(500);
   }
 });
