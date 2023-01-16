@@ -1,0 +1,12 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    <h2>Edit Product</h2>
+    <form method="post">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      {{{form}}}
+      <input type="submit" value="Edit Product" class="btn btn-primary" />
+    </form>
+  {{/block}}
+
+{{/extends}}

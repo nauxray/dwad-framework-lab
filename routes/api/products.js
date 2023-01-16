@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { Product } = require("../../models");
+const { getShopProducts, getProductById } = require("../../services/products");
 
 router.get("/", async (req, res) => {
   try {
@@ -42,31 +43,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const products = await Product.query({
-      where: { id: req.params.id },
-    }).fetch({
-      withRelated: [
-        "brand",
-        "series",
-        "tags",
-        "materials",
-        {
-          shop: (query) => {
-            query
-              .join("users", "users.id", "=", "shop.user_id")
-              .select(
-                "shop.id",
-                "shop.shop_bio",
-                "users.username",
-                "users.pfp",
-                "users.role",
-                "users.email"
-              );
-          },
-        },
-      ],
-      require: true,
-    });
+    const products = await getProductById(req.params.id);
     res.send(products.toJSON());
   } catch (err) {
     res.sendStatus(500);
@@ -75,25 +52,7 @@ router.get("/:id", async (req, res) => {
 
 router.get("/shop/:id", async (req, res) => {
   try {
-    const shopProducts = await Product.query({
-      where: { shop_id: req.params.id },
-    }).fetchAll({
-      withRelated: {
-        shop: (query) => {
-          query
-            .join("users", "users.id", "=", "shop.user_id")
-            .select(
-              "shop.id",
-              "shop.shop_bio",
-              "users.username",
-              "users.pfp",
-              "users.role",
-              "users.email"
-            );
-        },
-      },
-      require: true,
-    });
+    const shopProducts = await getShopProducts(req.params.id);
     res.send(shopProducts.toJSON());
   } catch (err) {
     res.sendStatus(500);

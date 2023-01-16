@@ -103,65 +103,51 @@ const createLoginForm = () => {
   });
 };
 
-const createEditProfileForm = function (categories = [], tags = []) {
+const createAddProductForm = function (brands = [], series = []) {
   return forms.create({
-    username: fields.string({
+    name: fields.string({
       required: true,
+      errorAfterField: true,
     }),
-    email: fields.email({
+    price: fields.number({
       required: true,
+      errorAfterField: true,
+      validators: [validators.integer()],
     }),
-    old_password: fields.password({
+    quantity: fields.number({
       required: true,
+      errorAfterField: true,
+      validators: [validators.integer()],
     }),
-    new_password: fields.password({
+    description: fields.string({
       required: true,
+      errorAfterField: true,
+      validators: [validators.maxlength(500), validators.minlength(0)],
     }),
-    confirm_new_password: fields.password({
+    brand_id: fields.string({
+      label: "Brand",
       required: true,
-      validators: [validators.matchField("password")],
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: brands.map((brnd) => [brnd.id, brnd.name]),
+    }),
+    series_id: fields.string({
+      label: "Series",
+      required: true,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: series.map((item) => [item.id, item.name]),
+    }),
+    img_url: fields.url({
+      label: "Image URL",
+      required: true,
     }),
   });
 };
 
-// const createSearchForm = function (categories = [], tags = []) {
-//   return forms.create({
-//     name: fields.string({
-//       required: false, // required is false because all search criteria are optional
-//     }),
-//     // using `fields.number` instead of `fields.string` means the textbox
-//     // only accept numbers on the browser.
-//     // the value in the form is still a string (all values sent to the server
-//     // will always be a string)
-//     min_cost: fields.number({
-//       required: false,
-//       validators: [validators.integer()],
-//       widget: widgets.number(),
-//     }),
-//     max_cost: fields.number({
-//       required: false,
-//       validators: [validators.integer()],
-//       widget: widgets.number(),
-//     }),
-//     category_id: fields.string({
-//       label: "Category",
-//       required: false,
-//       widget: widgets.select(), // use the select dropdown
-//       choices: categories, // `categories` is one of the parameters passed to the function
-//     }),
-//     tags: fields.string({
-//       required: false,
-//       widget: widgets.multipleSelect(),
-//       choices: tags, // `tags` is one of the parameters passed to the function
-//     }),
-//   });
-// };
-
 module.exports = {
   bootstrapField,
-  //   createProductForm,
   createSignUpForm,
   createLoginForm,
-  createEditProfileForm,
-  // createSearchForm,
+  createAddProductForm,
 };

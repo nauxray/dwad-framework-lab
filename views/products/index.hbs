@@ -1,0 +1,50 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    {{#if user}}
+      <h2>Welcome! View all products here.</h2>
+    {{else}}
+      <h2>Please login first to view your shop products!</h2>
+    {{/if}}
+
+    <a class="btn btn-primary my-4" href="/products/add">Add Product</a>
+    <h3 class="mb-3">All Products</h3>
+
+    <div class="d-flex flex-column mb-2 container">
+      {{#each products}}
+        <div class="row">
+          <div class="col col-10 alert alert-success d-flex flex-column">
+            <img
+              src={{this.img_url}}
+              style="width:120px; height:120px; border-radius:4px; margin-bottom:10px;"
+              alt="product-image"
+            />
+            <h5>{{this.name}}</h5>
+            <span>Brand: {{this.brand.name}}</span>
+            <span>Series: {{this.series.name}}</span>
+            <span>Price: ${{this.price}}</span>
+            <span>Quantity: {{this.quantity}} left</span>
+            <span>Sales made: {{this.sales}} sold</span>
+            <span>Description: {{this.description}}</span>
+            <span>Created at: {{this.created_at}}</span>
+          </div>
+          <div
+            class="col col-2 d-flex flex-row justify-content-center align-items-start"
+            style="gap:10px;"
+          >
+            <a
+              class="btn btn-primary"
+              href="/products/edit/{{this.id}}"
+            >Edit</a>
+            <a
+              class="btn btn-danger"
+              href="/products/delete/{{this.id}}"
+            >Delete</a>
+          </div>
+        </div>
+      {{/each}}
+
+    </div>
+  {{/block}}
+
+{{/extends}}

@@ -1,0 +1,32 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    <form method="POST" style="margin:0;">
+      <h2>Delete Product</h2>
+      <div class="mt-4 d-flex flex-column">
+        <img
+          src={{product.img_url}}
+          style="width:120px; height:120px; border-radius:4px; margin-bottom:10px;"
+          alt="product-image"
+        />
+        <h5>{{product.name}}</h5>
+        <span>Brand: {{product.brand.name}}</span>
+        <span>Series: {{product.series.name}}</span>
+        <span>Price: ${{product.price}}</span>
+        <span>Quantity: {{product.quantity}} left</span>
+        <span>Sales made: {{product.sales}} sold</span>
+        <span>Description: {{product.description}}</span>
+        <span>Created at: {{product.created_at}}</span>
+      </div>
+
+      <h5 class="text-danger mt-4 text-center">Are you sure you want to delete
+        {{product.name}}?</h5>
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <div style="margin:0 auto; width:fit-content;gap:10px;" class="d-flex">
+        <a class="btn btn-primary" href="/products">No, go back</a>
+        <button type="submit" class="btn btn-danger" value="delete">Yes, delete</button>
+      </div>
+    </form>
+  {{/block}}
+
+{{/extends}}
