@@ -3,29 +3,11 @@ const { authenticateToken } = require("../../middlewares");
 const router = express.Router();
 
 const { CartItem } = require("../../models");
+const { getUserCart } = require("../../services/cart");
 
 router.get("/:id", authenticateToken, async (req, res) => {
   try {
-    const cart = await CartItem.query({
-      where: { user_id: req.params.id },
-    }).fetchAll({
-      withRelated: {
-        product: (query) => {
-          query
-            .join("shop", "shop.id", "=", "products.shop_id")
-            .join("users", "users.id", "=", "shop.user_id")
-            .select(
-              "shop.shop_bio",
-              "products.*",
-              "users.username as shop_name",
-              "users.pfp",
-              "users.role",
-              "users.email"
-            );
-        },
-      },
-      require: false,
-    });
+    const cart = await getUserCart(req.params.id);
     res.send(cart.toJSON());
   } catch (err) {
     res.sendStatus(500);
@@ -60,7 +42,8 @@ router.post("/add/:id", authenticateToken, async (req, res) => {
   }
 });
 
-router.delete("/remove/:id", authenticateToken, async (req, res) => {
+// delete entire product regardless of qty
+router.delete("/remove/product/:id", authenticateToken, async (req, res) => {
   try {
     const user_id = req.user.userId;
     await CartItem.where({
@@ -73,6 +56,21 @@ router.delete("/remove/:id", authenticateToken, async (req, res) => {
       });
 
     res.status(204).send({});
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+// delete cartItem, minus 1 from qty
+router.delete("/remove/:productId", authenticateToken, async (req, res) => {
+  try {
+    const item = await CartItem.where({
+      product_id: req.params.productId,
+      user_id: req.user.userId,
+    }).fetch({ require: true });
+
+    await item.destroy();
+    res.status(204).send({ success: true });
   } catch (err) {
     res.sendStatus(500);
   }

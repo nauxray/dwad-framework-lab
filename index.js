@@ -72,9 +72,10 @@ const api = {
   products: require("./routes/api/products"),
   cart: require("./routes/api/cart"),
   shop: require("./routes/api/shop"),
+  checkout: require("./routes/api/checkout"),
 };
 
-const landingRoutes = require("./routes/landing");
+const productRoutes = require("./routes/products");
 const brandRoutes = require("./routes/brands");
 const materialRoutes = require("./routes/materials");
 const orderRoutes = require("./routes/orders");
@@ -83,7 +84,7 @@ const tagsRoutes = require("./routes/tags");
 const userRoutes = require("./routes/users");
 
 async function main() {
-  app.use("/", landingRoutes);
+  app.use("/products", productRoutes);
   app.use("/brands", brandRoutes);
   app.use("/materials", materialRoutes);
   app.use("/orders", orderRoutes);
@@ -93,6 +94,10 @@ async function main() {
 
   Object.keys(api).map((route) => {
     app.use(`/api/${route}`, api[route]);
+  });
+
+  app.use("/", (req, res) => {
+    res.redirect("/products");
   });
 }
 
