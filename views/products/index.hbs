@@ -7,9 +7,13 @@
       <h2>Please login first to view your shop products!</h2>
     {{/if}}
 
+    <form method="GET">
+      {{{form}}}
+      <input type="submit" class="mb-3 mt-3 btn btn-primary" value="Search" />
+    </form>
+
     <a class="btn btn-primary my-4" href="/products/add">Add Product</a>
     <h3 class="mb-3">All Products</h3>
-
     <div class="d-flex flex-column mb-2 container">
       {{#each products}}
         <div class="row">

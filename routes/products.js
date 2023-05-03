@@ -1,18 +1,70 @@
 const express = require("express");
-const { createAddProductForm, bootstrapField } = require("../forms");
+const {
+  createAddProductForm,
+  bootstrapField,
+  createSearchForm,
+} = require("../forms");
 const { checkIfAuthenticated } = require("../middlewares");
 const { Product } = require("../models");
 const router = express.Router();
 
 const { getAllSeries } = require("../services/series");
 const { getBrands } = require("../services/brands");
-const { getShopProducts, getProductById } = require("../services/products");
+const { getProductById, getShopProducts } = require("../services/products");
 
 router.get("/", checkIfAuthenticated, async (req, res) => {
   try {
-    let products = (await getShopProducts(req.session.user.id)).toJSON();
-    res.render("products/index", {
-      products,
+    const userId = req.session.user.id;
+    const shopProducts = (await getShopProducts(req.session.user.id)).toJSON();
+    const brands = (await getBrands()).map((brand) => [brand.id, brand.name]);
+    const allSeries = (await getAllSeries()).map((series) => [
+      series.id,
+      series.name,
+    ]);
+    allSeries.unshift([0, "----"]);
+    brands.unshift([0, "----"]);
+
+    const searchForm = createSearchForm(brands, allSeries);
+    const query = Product.collection();
+
+    searchForm.handle(req, {
+      empty: async (form) => {
+        res.render("products/index", {
+          products: shopProducts,
+          form: form.toHTML(bootstrapField),
+        });
+      },
+      error: async (form) => {
+        res.render("products/index", {
+          products: shopProducts,
+          form: form.toHTML(bootstrapField),
+        });
+      },
+      success: async (form) => {
+        const data = form.data;
+        const products = await Product.query((qb) => {
+          query.where("shop_id", "=", userId);
+          if (data.name) {
+            qb.whereILike("name", `%${data.name}%`);
+          }
+          if (data.brand_id && data.brand_id != "0") {
+            query.where("brand_id", "=", data.brand_id);
+          }
+          if (data.series_id && data.series_id != "0") {
+            query.where("series_id", "=", data.series_id);
+          }
+          if (data.min_price) {
+            qb.andWhere("price", ">=", +data.min_price);
+          }
+          if (data.max_price) {
+            qb.andWhere("price", "<=", +data.max_price);
+          }
+        }).fetchAll({ withRelated: ["brand", "series"], required: false });
+        res.render("products/index", {
+          products: products.toJSON(),
+          form: form.toHTML(bootstrapField),
+        });
+      },
     });
   } catch (err) {
     res.status(500).send([]);

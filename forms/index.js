@@ -4,7 +4,7 @@ const fields = forms.fields;
 const validators = forms.validators;
 const widgets = forms.widgets;
 
-var bootstrapField = function (name, object) {
+const bootstrapField = (name, object) => {
   if (!Array.isArray(object.widget.classes)) {
     object.widget.classes = [];
   }
@@ -13,66 +13,20 @@ var bootstrapField = function (name, object) {
     object.widget.classes.push("form-control");
   }
 
-  var validationclass = object.value && !object.error ? "is-valid" : "";
+  let validationclass = object.value && !object.error ? "is-valid" : "";
   validationclass = object.error ? "is-invalid" : validationclass;
   if (validationclass) {
     object.widget.classes.push(validationclass);
   }
 
-  var label = object.labelHTML(name);
-  var error = object.error
+  const label = object.labelHTML(name);
+  const error = object.error
     ? '<div class="invalid-feedback">' + object.error + "</div>"
     : "";
 
-  var widget = object.widget.toHTML(name, object);
+  const widget = object.widget.toHTML(name, object);
   return '<div class="form-group">' + label + widget + error + "</div>";
 };
-
-// // if allCategories is null, it will be an empty array
-// // if allTags is null, it will be an empty array
-// const createProductForm = (allCategories = [], allTags = []) => {
-//   // use forms.create to create a new form object
-//   return forms.create({
-//     name: fields.string({
-//       required: true,
-//       errorAfterField: true,
-//     }),
-//     cost: fields.number({
-//       required: true,
-//       errorAfterField: true,
-//       // indicate the field must be an integeer
-//       // IMPORTANT: note the function call
-//       // in the array
-//       validators: [validators.integer()],
-//     }),
-//     description: fields.string({
-//       required: true,
-//       errorAfterField: true,
-//     }),
-//     category_id: fields.string({
-//       label: "Category",
-//       required: true,
-//       errorAfterField: true,
-
-//       // indicate that we want to display as select dropdown
-//       widget: widgets.select(),
-//       // choices must be an array of array
-//       // each inner array must have 2 elements
-//       // - index 0: the ID of the choice
-//       // - index 1: the display value of the choice
-//       choices: allCategories,
-//     }),
-//     tags: fields.string({
-//       required: true,
-//       errorAfterField: true,
-//       widget: widgets.multipleSelect(),
-//       choices: allTags,
-//     }),
-//     image_url: fields.string({
-//       widget: widgets.hidden(), // this creates a hidden form field
-//     }),
-//   });
-// };
 
 const createSignUpForm = () => {
   return forms.create({
@@ -103,7 +57,7 @@ const createLoginForm = () => {
   });
 };
 
-const createAddProductForm = function (brands = [], series = []) {
+const createAddProductForm = (brands = [], series = []) => {
   return forms.create({
     name: fields.string({
       required: true,
@@ -144,9 +98,43 @@ const createAddProductForm = function (brands = [], series = []) {
   });
 };
 
+const createSearchForm = (brands = [], series = []) => {
+  return forms.create({
+    name: fields.string({
+      required: false,
+      errorAfterField: true,
+    }),
+    min_price: fields.string({
+      required: false,
+      errorAfterField: true,
+      validators: [validators.integer()],
+    }),
+    max_price: fields.string({
+      required: false,
+      errorAfterField: true,
+      validators: [validators.integer()],
+    }),
+    brand_id: fields.string({
+      label: "Brand",
+      required: false,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: brands,
+    }),
+    series_id: fields.string({
+      label: "Series",
+      required: false,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: series,
+    }),
+  });
+};
+
 module.exports = {
   bootstrapField,
   createSignUpForm,
   createLoginForm,
   createAddProductForm,
+  createSearchForm,
 };
