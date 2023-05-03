@@ -1,67 +1,49 @@
 const express = require("express");
-const { authenticateToken } = require("../../middlewares");
 const router = express.Router();
-const { getUserCart } = require("../../dal/cart");
 require("dotenv").config();
-const Stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const { authenticateToken } = require("../../middlewares");
+const { createCheckoutSession } = require("../../services/checkout");
+const { getUserCart } = require("../../dal/cart");
+const {
+  createOrder,
+  updateSessionId,
+  updatePaidOrder,
+} = require("../../services/orders");
+const { clearCart } = require("../../services/cart");
+const { getOrderBySessionId } = require("../../dal/orders");
+
+const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
 router.get("/", authenticateToken, async (req, res) => {
-  let items = await getUserCart(req.user.userId);
-
-  let lineItems = [];
-  let meta = [];
-  const filteredItems = [];
-  items.toJSON().map((item) => {
-    if (
-      filteredItems.filter((j) => j.product_id === item.product_id).length === 0
-    ) {
-      filteredItems.push(item);
-    }
-  });
-
-  for (let i of filteredItems) {
-    const quantity = await items.where({ product_id: i.product_id }).count();
-    const lineItem = {
-      quantity,
-      price_data: {
-        currency: "SGD",
-        unit_amount: parseFloat(i.product.price),
-        product_data: {
-          name: i.product.name,
-        },
-      },
-    };
-    lineItems.push(lineItem);
-    meta.push({
-      product_id: i.product_id,
-      quantity,
-    });
+  try {
+    const cartItems = await getUserCart(req.user.userId);
+    const orderId = await createOrder(req.user.userId, cartItems);
+    const stripeSession = await createCheckoutSession(cartItems);
+    await clearCart(req.user.userId);
+    await updateSessionId(orderId, stripeSession.id);
+    res.send({ url: stripeSession.url });
+  } catch (error) {
+    res.status(400).send({ error: "Could not create a checkout session!" });
   }
-
-  let metaData = JSON.stringify(meta);
-  const payment = {
-    payment_method_types: ["card"],
-    mode: "payment",
-    line_items: lineItems,
-    success_url:
-      process.env.STRIPE_SUCCESS_URL + "?sessionId={CHECKOUT_SESSION_ID}",
-    cancel_url: process.env.STRIPE_ERROR_URL,
-    metadata: {
-      orders: metaData,
-    },
-  };
-
-  let stripeSession = await Stripe.checkout.sessions.create(payment);
-  res.send({ sessionID: stripeSession.id });
 });
+
+router.post("/success", authenticateToken, async (req, res) => {
+  try {
+    const orderId = (await getOrderBySessionId(req.body.sessionId)).get("id");
+    await updatePaidOrder(orderId);
+  } catch (error) {
+    res.status(400).send({ error });
+  }
+});
+
+// another api for completing payment. need to createCheckoutSession, update order with new session id
 
 router.post(
   "/process_payment",
   express.raw({ type: "application/json" }),
   async (req, res) => {
-    let payload = req.body;
-    let endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
-    let sigHeader = req.headers["stripe-signature"];
+    const payload = req.body;
+    const sigHeader = req.headers["stripe-signature"];
     let event;
     try {
       event = Stripe.webhooks.constructEvent(
@@ -70,9 +52,7 @@ router.post(
         endpointSecret
       );
     } catch (e) {
-      res.send({
-        error: e.message,
-      });
+      res.send({ error: e.message });
       console.log(e.message);
     }
     if (event.type == "checkout.session.completed") {

@@ -53,7 +53,6 @@ router.put("/:id/edit", async (req, res) => {
 
 router.post("/login", handleLoginForm, async (req, res) => {
   try {
-    console.log("status", res.locals.status);
     if (res.locals.status === "success") {
       res.status(200).send({
         user: req.session.user,
