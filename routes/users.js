@@ -7,9 +7,9 @@ const {
 const router = express.Router();
 
 const { User } = require("../models");
-const { getUserById, handleLoginForm } = require("../dal/users");
+const { getUserById } = require("../dal/users");
 const { getHashedPassword } = require("../utils/getHashedPw");
-const { checkIfAuthenticated } = require("../middlewares");
+const { checkIfAuthenticated, handleLoginForm } = require("../middlewares");
 
 router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
   try {

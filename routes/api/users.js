@@ -1,16 +1,12 @@
 const express = require("express");
-const {
-  createLoginForm,
-  createSignUpForm,
-  bootstrapField,
-  createEditProfileForm,
-} = require("../../forms");
+const { createSignUpForm, bootstrapField } = require("../../forms");
 const router = express.Router();
 
 const { User } = require("../../models");
-const { getUserById, handleLoginForm } = require("../../dal/users");
+const { getUserById } = require("../../dal/users");
 const { getHashedPassword } = require("../../utils/getHashedPw");
 const { generateAccessToken } = require("../../utils/jwtUtils");
+const { handleLoginForm } = require("../../middlewares");
 
 router.get("/:id/profile", async (req, res) => {
   try {
