@@ -3,7 +3,7 @@ const { authenticateToken } = require("../../middlewares");
 const router = express.Router();
 
 const { CartItem } = require("../../models");
-const { getUserCart } = require("../../services/cart");
+const { getUserCart } = require("../../dal/cart");
 
 router.get("/:id", authenticateToken, async (req, res) => {
   try {

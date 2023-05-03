@@ -1,7 +1,7 @@
 const express = require("express");
 const { authenticateToken } = require("../../middlewares");
 const router = express.Router();
-const { getUserCart } = require("../../services/cart");
+const { getUserCart } = require("../../dal/cart");
 require("dotenv").config();
 const Stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 

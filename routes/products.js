@@ -8,9 +8,9 @@ const { checkIfAuthenticated } = require("../middlewares");
 const { Product } = require("../models");
 const router = express.Router();
 
-const { getAllSeries } = require("../services/series");
-const { getBrands } = require("../services/brands");
-const { getProductById, getShopProducts } = require("../services/products");
+const { getAllSeries } = require("../dal/series");
+const { getBrands } = require("../dal/brands");
+const { getProductById, getShopProducts } = require("../dal/products");
 
 router.get("/", checkIfAuthenticated, async (req, res) => {
   try {
