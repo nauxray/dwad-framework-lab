@@ -82,6 +82,7 @@ const orderRoutes = require("./routes/orders");
 const seriesRoutes = require("./routes/series");
 const tagsRoutes = require("./routes/tags");
 const userRoutes = require("./routes/users");
+const cloudinaryRoutes = require("./routes/cloudinary");
 
 async function main() {
   app.use("/products", productRoutes);
@@ -91,6 +92,7 @@ async function main() {
   app.use("/series", seriesRoutes);
   app.use("/tags", tagsRoutes);
   app.use("/users", userRoutes);
+  app.use("/cloudinary", cloudinaryRoutes);
 
   Object.keys(api).map((route) => {
     app.use(`/api/${route}`, api[route]);

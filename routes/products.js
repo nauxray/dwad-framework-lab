@@ -26,6 +26,9 @@ router.get("/add", checkIfAuthenticated, async (req, res) => {
     const addProductForm = createAddProductForm(brands, allSeries);
     res.render("products/add", {
       form: addProductForm.toHTML(bootstrapField),
+      cloudinaryName: process.env.CLOUDINARY_NAME,
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
     });
   } catch (err) {
     res.status(500).send([]);
@@ -54,11 +57,17 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
+          cloudinaryName: process.env.CLOUDINARY_NAME,
+          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
         });
       },
       empty: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
+          cloudinaryName: process.env.CLOUDINARY_NAME,
+          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
         });
       },
     });
@@ -80,10 +89,14 @@ router.get("/edit/:id", checkIfAuthenticated, async (req, res) => {
     editProductForm.fields.description.value = product.get("description");
     editProductForm.fields.brand_id.value = product.get("brand");
     editProductForm.fields.series_id.value = product.get("series");
+    editProductForm.fields.img_url.value = product.get("img_url");
 
     res.render("products/edit", {
-      product,
+      product: product.toJSON(),
       form: editProductForm.toHTML(bootstrapField),
+      cloudinaryName: process.env.CLOUDINARY_NAME,
+      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+      cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
     });
   } catch (err) {
     res.sendStatus(500);
@@ -112,11 +125,17 @@ router.post("/edit/:id", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
+          cloudinaryName: process.env.CLOUDINARY_NAME,
+          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
         });
       },
       empty: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
+          cloudinaryName: process.env.CLOUDINARY_NAME,
+          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
+          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
         });
       },
     });

@@ -138,9 +138,8 @@ const createAddProductForm = function (brands = [], series = []) {
       widget: widgets.select(),
       choices: series.map((item) => [item.id, item.name]),
     }),
-    img_url: fields.url({
-      label: "Image URL",
-      required: true,
+    img_url: fields.string({
+      widget: widgets.hidden(),
     }),
   });
 };
