@@ -1,6 +1,6 @@
 const { getOrderItems } = require("../dal/orders");
 const { Order, OrderItem } = require("../models");
-const { deductProductQty } = require("./product");
+const { deductProductQty, updateProductSales } = require("./product");
 
 const createOrder = async (userId, cartItems) => {
   let totalCost = 0;
@@ -48,6 +48,7 @@ const updatePaidOrder = async (orderId) => {
     }
     Object.keys(productQtys).forEach(async (productId) => {
       await deductProductQty(+productId, productQtys[productId]);
+      await updateProductSales(+productId, productQtys[productId]);
     });
   }
 };

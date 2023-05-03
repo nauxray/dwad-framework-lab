@@ -11,4 +11,14 @@ const deductProductQty = async (id, qty) => {
   await product.save();
 };
 
-module.exports = { deductProductQty };
+const updateProductSales = async (id, qty) => {
+  const product = await Product.where({ id }).fetch({ require: true });
+  const productData = product.toJSON();
+  product.set({
+    ...product.toJSON(),
+    sales: +productData.sales + qty,
+  });
+  await product.save();
+};
+
+module.exports = { deductProductQty, updateProductSales };
