@@ -1,6 +1,6 @@
 const { User } = require("../models");
 
-const getUserById = async (id) => {
+const getShopById = async (id) => {
   const user = await User.query()
     .join("shop", "shop.user_id", "=", "users.id")
     .where({ "users.id": id })
@@ -18,4 +18,8 @@ const getUserById = async (id) => {
   return user;
 };
 
-module.exports = { getUserById };
+const getUserById = async (id) => {
+  return await User.query().where({ "users.id": id }).select();
+};
+
+module.exports = { getShopById, getUserById };

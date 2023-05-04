@@ -3,14 +3,17 @@ const { createSignUpForm, bootstrapField } = require("../../forms");
 const router = express.Router();
 
 const { User } = require("../../models");
-const { getUserById } = require("../../dal/users");
+const { getUserById, getShopById } = require("../../dal/users");
 const { getHashedPassword } = require("../../utils/getHashedPw");
 const { generateAccessToken } = require("../../utils/jwtUtils");
-const { handleLoginForm } = require("../../middlewares");
+const { handleLoginForm, handleSignupForm } = require("../../middlewares");
 
 router.get("/:id/profile", async (req, res) => {
   try {
-    const user = (await getUserById(req.params.id))?.[0];
+    let user = (await getUserById(req.params.id))?.[0];
+    if (user.role === "seller") {
+      user = (await getShopById(req.params.id))?.[0];
+    }
     res.send(user);
   } catch (err) {
     res.sendStatus(500);
@@ -71,34 +74,16 @@ router.get("/logout", (req, res) => {
   res.status(200).send({});
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", handleSignupForm, async (req, res) => {
   try {
-    const signUpForm = createSignUpForm();
-    signUpForm.handle(req, {
-      success: async (form) => {
-        const user = new User();
-        const { confirm_password, ...userData } = form.data;
-        userData.password = getHashedPassword(userData.password);
-        userData.role = "buyer";
-        userData.pfp = "https://youtube.com";
-        userData.created_at = new Date();
-        user.set(userData);
-
-        await user.save();
-        req.flash("success_messages", "Your account has been created");
-        res.redirect("/users/login");
-      },
-      error: (form) => {
-        res.render("users/create", {
-          form: form.toHTML(bootstrapField),
-        });
-      },
-      empty: (form) => {
-        res.render("users/create", {
-          form: form.toHTML(bootstrapField),
-        });
-      },
-    });
+    if (res.locals.status === "success") {
+      res.status(200).send({
+        user: req.session.user,
+        token: generateAccessToken(req.session.user.id),
+      });
+    } else {
+      res.status(400).send({ error: res.locals.errorMsg });
+    }
   } catch (err) {
     if (err?.message === "EmptyResponse") res.status(404).send([]);
     res.sendStatus(500);
