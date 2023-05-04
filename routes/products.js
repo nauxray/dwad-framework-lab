@@ -25,7 +25,6 @@ router.get("/", checkIfAuthenticated, async (req, res) => {
     brands.unshift([0, "----"]);
 
     const searchForm = createSearchForm(brands, allSeries);
-    const query = Product.collection();
 
     searchForm.handle(req, {
       empty: async (form) => {
@@ -43,15 +42,15 @@ router.get("/", checkIfAuthenticated, async (req, res) => {
       success: async (form) => {
         const data = form.data;
         const products = await Product.query((qb) => {
-          query.where("shop_id", "=", userId);
+          qb.where("shop_id", "=", userId);
           if (data.name) {
             qb.whereILike("name", `%${data.name}%`);
           }
           if (data.brand_id && data.brand_id != "0") {
-            query.where("brand_id", "=", data.brand_id);
+            qb.where("brand_id", "=", data.brand_id);
           }
           if (data.series_id && data.series_id != "0") {
-            query.where("series_id", "=", data.series_id);
+            qb.where("series_id", "=", data.series_id);
           }
           if (data.min_price) {
             qb.andWhere("price", ">=", +data.min_price);

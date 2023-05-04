@@ -1,5 +1,9 @@
 const jwt = require("jsonwebtoken");
-const { createLoginForm, createSignUpForm } = require("../forms");
+const {
+  createLoginForm,
+  createSignUpForm,
+  bootstrapField,
+} = require("../forms");
 const { User } = require("../models");
 const { getHashedPassword } = require("../utils/getHashedPw");
 require("dotenv").config();
@@ -40,25 +44,30 @@ const handleLoginForm = async (req, res, next) => {
         require: false,
       });
       if (user) {
-        req.session.user = {
-          id: user.get("id"),
-          email: user.get("email"),
-          username: user.get("username"),
-        };
-        res.locals.status = "success";
+        if (user.get("role") === "seller") {
+          req.session.user = {
+            id: user.get("id"),
+            email: user.get("email"),
+            username: user.get("username"),
+          };
+          res.locals.status = "success";
+        } else {
+          res.locals.status = "forbiddenLogin";
+        }
       } else {
         res.locals.status = "wrongCredentials";
       }
+      res.locals.form = form.toHTML(bootstrapField);
       next();
     },
     error: (form) => {
       res.locals.status = "error";
-      res.locals.form = form;
+      res.locals.form = form.toHTML(bootstrapField);
       next();
     },
     empty: (form) => {
       res.locals.status = "empty";
-      res.locals.form = form;
+      res.locals.form = form.toHTML(bootstrapField);
       next();
     },
   });
@@ -95,7 +104,7 @@ const handleSignupForm = async (req, res, next) => {
         email,
         username,
         password: getHashedPassword(password),
-        role: "buyer",
+        role: req.body.role ? "seller" : "buyer",
         pfp: "",
         created_at: new Date(),
       };
@@ -113,12 +122,12 @@ const handleSignupForm = async (req, res, next) => {
     },
     error: (form) => {
       res.locals.status = "error";
-      res.locals.form = form;
+      res.locals.form = form.toHTML(bootstrapField);
       next();
     },
     empty: (form) => {
       res.locals.status = "empty";
-      res.locals.form = form;
+      res.locals.form = form.toHTML(bootstrapField);
       next();
     },
   });

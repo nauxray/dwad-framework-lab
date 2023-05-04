@@ -4,8 +4,9 @@
     <h2>Create account</h2>
     <form method="post">
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      <input type="hidden" name="role" value="seller" />
       {{{form}}}
-      <input type="submit" value="Create account" class="btn btn-primary" />
+      <input type="submit" value="Create account" class="btn btn-primary" style="margin-top:1rem;" />
     </form>
   {{/block}}
 

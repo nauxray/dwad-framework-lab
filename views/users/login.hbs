@@ -5,8 +5,9 @@
     <form method="post">
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
       {{{form}}}
-      <input type="submit" value="Sign in" class="btn btn-primary" />
+      <input type="submit" value="Sign in" class="btn btn-primary" style="margin-top: 1rem;" />
     </form>
+    <a href="/users/create" class="btn btn-primary">Create a shop account here</a>
   {{/block}}
 
 {{/extends}}

@@ -13,7 +13,7 @@
     </form>
 
     <a class="btn btn-primary my-4" href="/products/add">Add Product</a>
-    <h3 class="mb-3">All Products</h3>
+    <h3 class="mb-3">All Products ({{products.length}})</h3>
     <div class="d-flex flex-column mb-2 container">
       {{#each products}}
         <div class="row">
@@ -47,7 +47,6 @@
           </div>
         </div>
       {{/each}}
-
     </div>
   {{/block}}
 

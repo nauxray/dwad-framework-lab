@@ -6,10 +6,12 @@ const {
 } = require("../forms");
 const router = express.Router();
 
-const { User } = require("../models");
 const { getUserById } = require("../dal/users");
-const { getHashedPassword } = require("../utils/getHashedPw");
-const { checkIfAuthenticated, handleLoginForm } = require("../middlewares");
+const {
+  checkIfAuthenticated,
+  handleLoginForm,
+  handleSignupForm,
+} = require("../middlewares");
 
 router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
   try {
@@ -44,13 +46,15 @@ router.post("/login", handleLoginForm, async (req, res) => {
         break;
       case "wrongCredentials":
         req.flash("error_messages", "Your login credentials is invalid");
-        res.redirect("/users/login");
+        res.redirect("/");
+        break;
+      case "forbiddenLogin":
+        req.flash("error_messages", "This portal is for sellers!");
+        res.redirect("/");
         break;
       case "error":
       case "empty":
-        res.render("users/login", {
-          form: res.locals.form,
-        });
+        res.redirect("users/login", { form: res.locals.form });
         break;
     }
   } catch (err) {
@@ -76,34 +80,22 @@ router.get("/create", async (req, res) => {
   }
 });
 
-router.post("/create", async (req, res) => {
+router.post("/create", handleSignupForm, async (req, res) => {
   try {
-    const signUpForm = createSignUpForm();
-    signUpForm.handle(req, {
-      success: async (form) => {
-        const user = new User();
-        const { confirm_password, ...userData } = form.data;
-        userData.password = getHashedPassword(userData.password);
-        userData.role = "buyer";
-        userData.pfp = "https://youtube.com";
-        userData.created_at = new Date();
-        user.set(userData);
-
-        await user.save();
+    switch (res.locals.status) {
+      case "success":
         req.flash("success_messages", "Your account has been created");
-        res.redirect("/users/login");
-      },
-      error: (form) => {
-        res.render("users/create", {
-          form: form.toHTML(bootstrapField),
-        });
-      },
-      empty: (form) => {
-        res.render("users/create", {
-          form: form.toHTML(bootstrapField),
-        });
-      },
-    });
+        res.redirect("/");
+        break;
+      case "wrongCredentials":
+        req.flash("error_messages", "Your login credentials is invalid");
+        res.redirect("/users/create");
+        break;
+      case "error":
+      case "empty":
+        res.render("users/create", { form: res.locals.form });
+        break;
+    }
   } catch (err) {
     if (err?.message === "EmptyResponse") res.status(404).send([]);
     res.sendStatus(500);

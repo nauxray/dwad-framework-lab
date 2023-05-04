@@ -22,7 +22,7 @@ const getShopProducts = async (shop_id) => {
         },
       },
     ],
-    require: true,
+    require: false,
   });
 
   return shopProducts;
