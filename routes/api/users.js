@@ -62,7 +62,7 @@ router.post("/login", handleLoginForm, async (req, res) => {
         token: generateAccessToken(req.session.user.id),
       });
     } else {
-      res.status(400).send({ error: "Invalid Credentials" });
+      res.status(400).send({ error: res.locals.errorMsg });
     }
   } catch (err) {
     res.sendStatus(500);

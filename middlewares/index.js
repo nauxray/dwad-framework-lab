@@ -43,8 +43,13 @@ const handleLoginForm = async (req, res, next) => {
       }).fetch({
         require: false,
       });
+
       if (user) {
-        if (user.get("role") === "seller") {
+        const role = user.get("role");
+        if (
+          (req.body.token && role === "buyer") ||
+          (!req.body.token && role === "seller")
+        ) {
           req.session.user = {
             id: user.get("id"),
             email: user.get("email"),
@@ -53,15 +58,18 @@ const handleLoginForm = async (req, res, next) => {
           res.locals.status = "success";
         } else {
           res.locals.status = "forbiddenLogin";
+          res.locals.errorMsg = "Forbidden Login";
         }
       } else {
         res.locals.status = "wrongCredentials";
+        res.locals.errorMsg = "Invalid Credentials";
       }
       res.locals.form = form.toHTML(bootstrapField);
       next();
     },
     error: (form) => {
       res.locals.status = "error";
+      res.locals.errorMsg = "Internal Server Error";
       res.locals.form = form.toHTML(bootstrapField);
       next();
     },
@@ -122,6 +130,7 @@ const handleSignupForm = async (req, res, next) => {
     },
     error: (form) => {
       res.locals.status = "error";
+      res.locals.errorMsg = "Internal Server Error";
       res.locals.form = form.toHTML(bootstrapField);
       next();
     },
