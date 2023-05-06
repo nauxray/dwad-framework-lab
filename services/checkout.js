@@ -3,7 +3,7 @@ const Stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const stripeSuccessUrl = process.env.STRIPE_SUCCESS_URL;
 const stripeErrorUrl = process.env.STRIPE_ERROR_URL;
 
-const createCheckoutSession = async (cartItems) => {
+const createCheckoutSession = async (cartItems, check) => {
   const lineItems = [];
   const meta = [];
   const filteredItems = [];
@@ -17,9 +17,10 @@ const createCheckoutSession = async (cartItems) => {
   });
 
   for (const i of filteredItems) {
-    const quantity = await cartItems
-      .where({ product_id: i.product_id })
-      .count();
+    const quantity = check
+      ? cartItems.toJSON().filter((j) => j.product_id === i.product_id).length
+      : await cartItems.where({ product_id: i.product_id }).count();
+
     const lineItem = {
       quantity,
       price_data: {

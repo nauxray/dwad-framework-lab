@@ -1,5 +1,4 @@
 const { Order, OrderItem } = require("../models");
-const { getProductById } = require("./products");
 
 const getOrderBySessionId = async (sessionId) => {
   const order = await Order.query({ where: { session_id: sessionId } }).fetch({
@@ -13,6 +12,17 @@ const getOrderItems = async (orderId) => {
   const orderItems = await OrderItem.query({
     where: { order_id: orderId },
   }).fetchAll({ require: false });
+
+  return orderItems;
+};
+
+const getOrderProducts = async (orderId) => {
+  const orderItems = await OrderItem.query({
+    where: { order_id: orderId },
+  }).fetchAll({
+    withRelated: ["product"],
+    require: false,
+  });
 
   return orderItems;
 };
@@ -42,4 +52,9 @@ const getUserOrders = async (user_id) => {
   return userOrders;
 };
 
-module.exports = { getOrderBySessionId, getOrderItems, getUserOrders };
+module.exports = {
+  getOrderBySessionId,
+  getOrderItems,
+  getOrderProducts,
+  getUserOrders,
+};

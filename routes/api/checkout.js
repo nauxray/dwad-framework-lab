@@ -10,7 +10,7 @@ const {
   updatePaidOrder,
 } = require("../../services/orders");
 const { clearCart } = require("../../services/cart");
-const { getOrderBySessionId } = require("../../dal/orders");
+const { getOrderBySessionId, getOrderProducts } = require("../../dal/orders");
 
 const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 
@@ -37,6 +37,21 @@ router.post("/success", authenticateToken, async (req, res) => {
 });
 
 // another api for completing payment. need to createCheckoutSession, update order with new session id
+router.get("/:orderId", authenticateToken, async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+    const orderItems = await getOrderProducts(orderId);
+    const stripeSession = await createCheckoutSession(
+      orderItems,
+      "completePayment"
+    );
+    await updateSessionId(orderId, stripeSession.id);
+    res.send({ url: stripeSession.url });
+  } catch (error) {
+    console.log(error);
+    res.status(400).send({ error: "Could not create a checkout session!" });
+  }
+});
 
 router.post(
   "/process_payment",

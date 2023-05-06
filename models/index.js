@@ -20,6 +20,9 @@ const Product = bookshelf.model("Product", {
   cartItems() {
     return this.belongsToMany("CartItem");
   },
+  orderItems() {
+    return this.belongsTo("OrderItem");
+  },
 });
 
 const CartItem = bookshelf.model("CartItem", {
@@ -58,8 +61,8 @@ const Order = bookshelf.model("Order", {
 
 const OrderItem = bookshelf.model("OrderItem", {
   tableName: "orderItems",
-  products() {
-    return this.hasMany("Product");
+  product() {
+    return this.belongsTo("Product");
   },
   order() {
     return this.belongsTo("Order");
