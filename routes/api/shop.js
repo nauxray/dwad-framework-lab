@@ -1,9 +1,7 @@
 const express = require("express");
-const { createSignUpForm, bootstrapField } = require("../../forms");
 const router = express.Router();
 
-const { User, Shop } = require("../../models");
-const { getHashedPassword } = require("../../utils/getHashedPw");
+const { Shop } = require("../../models");
 
 router.get("/featured", async (req, res) => {
   try {

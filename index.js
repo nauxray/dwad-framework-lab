@@ -73,6 +73,7 @@ const api = {
   cart: require("./routes/api/cart"),
   shop: require("./routes/api/shop"),
   checkout: require("./routes/api/checkout"),
+  orders: require("./routes/api/orders"),
 };
 
 const productRoutes = require("./routes/products");
