@@ -17,10 +17,26 @@ const endpointSecret = process.env.STRIPE_ENDPOINT_SECRET;
 router.get("/", authenticateToken, async (req, res) => {
   try {
     const cartItems = await getUserCart(req.user.userId);
-    const orderId = await createOrder(req.user.userId, cartItems);
+    const groupByShop = {};
+    cartItems.toJSON().forEach((item) => {
+      if (groupByShop[item.product.shop_id]) {
+        groupByShop[item.product.shop_id].push(item);
+      } else {
+        groupByShop[item.product.shop_id] = [item];
+      }
+    });
+
+    let orderIds = [];
+    Object.values(groupByShop).forEach(async (items) => {
+      orderIds.push(createOrder(req.user.userId, items));
+    });
+    orderIds = await Promise.all(orderIds);
     const stripeSession = await createCheckoutSession(cartItems);
     await clearCart(req.user.userId);
-    await updateSessionId(orderId, stripeSession.id);
+    orderIds.forEach(async (id) => {
+      await updateSessionId(id, stripeSession.id);
+    });
+
     res.send({ url: stripeSession.url });
   } catch (error) {
     res.status(400).send({ error: "Could not create a checkout session!" });
@@ -29,14 +45,16 @@ router.get("/", authenticateToken, async (req, res) => {
 
 router.post("/success", authenticateToken, async (req, res) => {
   try {
-    const orderId = (await getOrderBySessionId(req.body.sessionId)).get("id");
-    await updatePaidOrder(orderId);
+    const orders = await getOrderBySessionId(req.body.sessionId);
+    const orderIds = orders.toJSON().map((order) => order.id);
+    orderIds.forEach(async (id) => {
+      await updatePaidOrder(id);
+    });
   } catch (error) {
     res.status(400).send({ error });
   }
 });
 
-// another api for completing payment. need to createCheckoutSession, update order with new session id
 router.get("/:orderId", authenticateToken, async (req, res) => {
   try {
     const orderId = req.params.orderId;

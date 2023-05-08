@@ -4,7 +4,7 @@ const { deductProductQty, updateProductSales } = require("./product");
 
 const createOrder = async (userId, cartItems) => {
   let totalCost = 0;
-  cartItems.toJSON().map((item) => (totalCost += +item.product.price));
+  cartItems.map((item) => (totalCost += +item.product.price));
 
   const order = new Order();
   order.set("created_at", new Date());
@@ -14,7 +14,7 @@ const createOrder = async (userId, cartItems) => {
   order.set("session_id", "");
   const createdOrder = await order.save();
 
-  cartItems.toJSON().map(async (item) => {
+  cartItems.map(async (item) => {
     const orderItem = new OrderItem();
     orderItem.set("product_id", item.product_id);
     orderItem.set("order_id", createdOrder.get("id"));
