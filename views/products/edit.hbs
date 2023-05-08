@@ -4,15 +4,15 @@
     <form method="post">
       <input type="hidden" name="_csrf" value="{{csrfToken}}" />
       {{{form}}}
-      <div>
+      <div style="margin:2rem 0;">
         {{#if product.img_url}}
-          <img src="{{product.img_url}}" style="width:15rem;height:auto;" id="uploaded_image" />
+          <img src="{{product.img_url}}" style="width:15rem;height:auto;margin-right:2rem;" id="uploaded_image" />
         {{else}}
-          <img src="" style="display:none;width:15rem;height:auto;" id="uploaded_image" />
+          <img src="" style="display:none;width:15rem;height:auto;margin-right:2rem;" id="uploaded_image" />
         {{/if}}
-      </div>
-      <div>
-        <a href="#" class="btn btn-primary" id="upload_widget">Upload</a>
+        <div style="display:inline-block;">
+          <a href="#" class="btn btn-primary" id="upload_widget">Upload</a>
+        </div>
       </div>
       <input type="submit" value="Edit Product" class="btn btn-primary" />
     </form>
