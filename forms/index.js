@@ -33,6 +33,7 @@ const createSignUpForm = () => {
   return forms.create({
     username: fields.string({
       required: true,
+      validators: [validators.alphanumeric("Username must be alphanumeric!")],
     }),
     email: fields.email({
       required: true,
@@ -108,7 +109,7 @@ const createSearchForm = (brands = [], series = []) => {
     min_price: fields.string({
       required: false,
       errorAfterField: true,
-      validators: [validators.integer()],
+      validators: [validators.integer(), validators.max()],
     }),
     max_price: fields.string({
       required: false,

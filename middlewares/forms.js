@@ -110,7 +110,8 @@ const handleSignupForm = async (req, res, next) => {
     },
     error: (form) => {
       res.locals.status = "error";
-      res.locals.errorMsg = "Internal Server Error";
+      res.locals.errorMsg =
+        form.fields.username.error ?? "Internal Server Error";
       res.locals.form = form.toHTML(bootstrapField);
       next();
     },
