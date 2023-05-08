@@ -169,6 +169,23 @@ const createOrderSearchForm = (brands = [], series = []) => {
   });
 };
 
+const createOrderUpdateForm = (orderIds, statusChoices) => {
+  return forms.create({
+    order_id: fields.string({
+      required: true,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: orderIds,
+    }),
+    status: fields.string({
+      required: true,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: statusChoices,
+    }),
+  });
+};
+
 module.exports = {
   bootstrapField,
   createSignUpForm,
@@ -176,4 +193,5 @@ module.exports = {
   createAddProductForm,
   createSearchForm,
   createOrderSearchForm,
+  createOrderUpdateForm,
 };

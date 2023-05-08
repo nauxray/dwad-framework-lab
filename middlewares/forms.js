@@ -8,8 +8,11 @@ const {
   bootstrapField,
   createSearchForm,
   createOrderSearchForm,
+  createOrderUpdateForm,
 } = require("../forms");
 const { User, Product, Shop } = require("../models");
+const { updateOrderStatus } = require("../services/orders");
+const { statuses } = require("../utils/constant");
 const { getHashedPassword } = require("../utils/getHashedPw");
 require("dotenv").config();
 
@@ -213,7 +216,6 @@ const handleOrdersSearchForm = async (req, res, next) => {
     },
     success: async (form) => {
       const data = form.data;
-      console.log(data);
       const queryCb = (qb) => {
         qb.where("shop_id", "=", shopId);
         if (data.product_name) {
@@ -240,9 +242,40 @@ const handleOrdersSearchForm = async (req, res, next) => {
   });
 };
 
+const handleOrderUpdateForm = async (req, res, next) => {
+  const shopId = (await getShop(req.session.user.id)).get("id");
+  const shopOrders = await getOrdersByShopId(shopId);
+
+  const updateForm = createOrderUpdateForm(
+    shopOrders.map((i) => [i.id, i.id]),
+    [...statuses.filter((i) => i !== "COMPLETED").map((i) => [i, i])]
+  );
+
+  updateForm.handle(req, {
+    empty: async (form) => {
+      res.locals.status = "empty";
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+    error: async (form) => {
+      res.locals.status = "error";
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+    success: async (form) => {
+      const data = form.data;
+      await updateOrderStatus(+data.order_id, data.status);
+      res.locals.status = "success";
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+  });
+};
+
 module.exports = {
   handleLoginForm,
   handleSignupForm,
   handleProductsSearchForm,
   handleOrdersSearchForm,
+  handleOrderUpdateForm,
 };

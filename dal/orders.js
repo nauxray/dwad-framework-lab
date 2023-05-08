@@ -1,7 +1,9 @@
 const { Order, OrderItem, Product } = require("../models");
 
 const getOrderBySessionId = async (sessionId) => {
-  const order = await Order.query({ where: { session_id: sessionId } }).fetch({
+  const order = await Order.query({
+    where: { session_id: sessionId },
+  }).fetchAll({
     require: false,
   });
 
@@ -132,6 +134,7 @@ const getOrdersByShopId = async (
 };
 
 module.exports = {
+  getOrderById,
   getOrderBySessionId,
   getOrderItems,
   getOrderProducts,
