@@ -22,13 +22,16 @@
             <span>Total Cost: S${{this.cost}}</span>
             <div style="margin-top:2rem;">
               {{#each this.orderItems}}
-                <div class="flex-column" style="display:inline-flex;">
+                <div
+                  class="flex-column"
+                  style="display:inline-flex;width:20%;align-items:center;"
+                >
                   <img
                     src={{this.img_url}}
                     alt={{this.name}}
                     style="width:8rem;height:8rem;object-fit:cover;border-radius:8px;overflow:hidden;"
                   />
-                  <span class="text-center">{{this.name}}</span>
+                  <span class="text-center" style="text">{{this.name}}</span>
                   <span class="text-center">S${{this.price}}</span>
                   <span class="text-center">Qty: {{this.qty}}</span>
 

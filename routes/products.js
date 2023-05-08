@@ -12,6 +12,7 @@ const { getAllSeries } = require("../dal/series");
 const { getBrands } = require("../dal/brands");
 const { getProductById, getShopProducts } = require("../dal/products");
 const { handleProductsSearchForm } = require("../middlewares/forms");
+const { getShop } = require("../dal/shop");
 
 const cloudinaryName = process.env.CLOUDINARY_NAME;
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
@@ -23,8 +24,8 @@ router.get(
   handleProductsSearchForm,
   async (req, res) => {
     try {
-      const userId = req.session.user.id;
-      const shopProducts = (await getShopProducts(userId)).toJSON();
+      const shopId = (await getShop(req.session.user.id)).get("id");
+      const shopProducts = (await getShopProducts(shopId)).toJSON();
 
       switch (res.locals.status) {
         case "success":
@@ -69,6 +70,7 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
     const brands = await getBrands();
     const allSeries = await getAllSeries();
     const addProductForm = createAddProductForm(brands, allSeries);
+    const shopId = (await getShop(req.session.user.id)).get("id");
 
     addProductForm.handle(req, {
       success: async (form) => {
@@ -77,7 +79,7 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
           ...form.data,
           sales: 0,
           created_at: new Date().toJSON().split("T")[0],
-          shop_id: req.session.user.id,
+          shop_id: shopId,
         });
 
         await newProd.save();

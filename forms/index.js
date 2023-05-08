@@ -79,6 +79,7 @@ const createAddProductForm = (brands = [], series = []) => {
       required: true,
       errorAfterField: true,
       validators: [validators.maxlength(500), validators.minlength(0)],
+      widget: widgets.textarea(),
     }),
     brand_id: fields.string({
       label: "Brand",

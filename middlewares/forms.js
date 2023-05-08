@@ -9,7 +9,7 @@ const {
   createSearchForm,
   createOrderSearchForm,
 } = require("../forms");
-const { User, Product } = require("../models");
+const { User, Product, Shop } = require("../models");
 const { getHashedPassword } = require("../utils/getHashedPw");
 require("dotenv").config();
 
@@ -99,6 +99,16 @@ const handleSignupForm = async (req, res, next) => {
 
       newUser.set(userData);
       const createdUser = await newUser.save();
+
+      if (req.body.role) {
+        const newShop = new Shop();
+        newShop.set({
+          user_id: createdUser.get("id"),
+          shop_featured: 0,
+          shop_bio: "",
+        });
+        await newShop.save();
+      }
 
       req.session.user = {
         id: createdUser.get("id"),
