@@ -13,4 +13,15 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
   }
 });
 
+router.post("/search/:userId", authenticateToken, async (req, res) => {
+  try {
+    console.log(req.body);
+    const userOrders = (await getUserOrders(req.params.userId)).toJSON();
+    res.send(userOrders);
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
 module.exports = router;

@@ -1,0 +1,52 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    {{#if user}}
+      <h2>Your Orders</h2>
+    {{else}}
+      <h2>Please login first to view your orders!</h2>
+    {{/if}}
+
+    <form method="GET">
+      {{{form}}}
+      <input type="submit" class="mb-3 mt-3 btn btn-primary" value="Search" />
+    </form>
+
+    <h3 class="mb-3">All Orders ({{orders.length}})</h3>
+    <div class="d-flex flex-column mb-2 container">
+      {{#each orders}}
+        <div class="row">
+          <div class="col col-10 alert alert-success d-flex flex-column">
+            <h5>Order ID: {{this.id}}</h5>
+            <span>Date: {{this.created_at}}</span>
+            <span>Total Cost: S${{this.cost}}</span>
+            <div style="margin-top:2rem;">
+              {{#each this.orderItems}}
+                <div class="flex-column" style="display:inline-flex;">
+                  <img
+                    src={{this.img_url}}
+                    alt={{this.name}}
+                    style="width:8rem;height:8rem;object-fit:cover;border-radius:8px;overflow:hidden;"
+                  />
+                  <span class="text-center">{{this.name}}</span>
+                  <span class="text-center">S${{this.price}}</span>
+                  <span class="text-center">Qty: {{this.qty}}</span>
+
+                </div>
+              {{/each}}
+            </div>
+          </div>
+          <div
+            class="col col-2 d-flex flex-wrap flex-row justify-content-center align-items-start"
+            style="gap:10px;height:fit-content;"
+          >
+            <span style="font-weight:500;">Status: {{this.status}}</span>
+            <a class="btn btn-primary" href="/orders/update/{{this.id}}">Update
+              Status</a>
+          </div>
+        </div>
+      {{/each}}
+    </div>
+  {{/block}}
+
+{{/extends}}

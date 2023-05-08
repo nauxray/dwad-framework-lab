@@ -1,4 +1,4 @@
-const { Order, OrderItem } = require("../models");
+const { Order, OrderItem, Product } = require("../models");
 
 const getOrderBySessionId = async (sessionId) => {
   const order = await Order.query({ where: { session_id: sessionId } }).fetch({
@@ -52,9 +52,52 @@ const getUserOrders = async (user_id) => {
   return userOrders;
 };
 
+const getOrderById = async (id) => {
+  const order = await Order.query({ where: { id } }).fetch({
+    withRelated: [
+      {
+        orderItems: (query) => {
+          query
+            .join("products", "products.id", "=", "orderItems.product_id")
+            .select(
+              "orderItems.*",
+              "products.name",
+              "products.price",
+              "products.description",
+              "products.img_url",
+              "products.shop_id",
+              "products.brand_id",
+              "products.series_id"
+            );
+        },
+      },
+    ],
+    require: false,
+  });
+  return order;
+};
+
+const getOrdersByShopId = async (shopId) => {
+  const shopProductIds = (
+    await Product.query().where({ shop_id: shopId }).select("id")
+  ).map((i) => i.id);
+
+  const orderIds = (
+    await OrderItem.query().whereIn("product_id", shopProductIds).select()
+  ).map((i) => i.order_id);
+
+  const orders = [];
+  Array.from(new Set(orderIds)).forEach((id) => {
+    orders.push(getOrderById(id));
+  });
+
+  return orders;
+};
+
 module.exports = {
   getOrderBySessionId,
   getOrderItems,
   getOrderProducts,
   getUserOrders,
+  getOrdersByShopId,
 };

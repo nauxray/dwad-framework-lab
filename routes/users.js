@@ -46,11 +46,11 @@ router.post("/login", handleLoginForm, async (req, res) => {
         break;
       case "wrongCredentials":
         req.flash("error_messages", "Your login credentials is invalid");
-        res.redirect("/");
+        res.redirect("users/login");
         break;
       case "forbiddenLogin":
         req.flash("error_messages", "This portal is for sellers!");
-        res.redirect("/");
+        res.redirect("users/login");
         break;
       case "error":
       case "empty":
