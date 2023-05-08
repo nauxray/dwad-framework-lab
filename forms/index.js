@@ -1,4 +1,5 @@
 const forms = require("forms");
+const { statuses } = require("../utils/constant");
 
 const fields = forms.fields;
 const validators = forms.validators;
@@ -131,10 +132,46 @@ const createSearchForm = (brands = [], series = []) => {
   });
 };
 
+const createOrderSearchForm = (brands = [], series = []) => {
+  return forms.create({
+    order_id: fields.string({
+      label: "Order Id",
+      required: false,
+      errorAfterField: true,
+      validators: [validators.integer()],
+    }),
+    product_name: fields.string({
+      required: false,
+      errorAfterField: true,
+    }),
+    brand_id: fields.string({
+      label: "Brand",
+      required: false,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: brands,
+    }),
+    series_id: fields.string({
+      label: "Series",
+      required: false,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: series,
+    }),
+    status: fields.string({
+      required: false,
+      errorAfterField: true,
+      widget: widgets.select(),
+      choices: [["", "----"], ...statuses.map((i) => [i, i])],
+    }),
+  });
+};
+
 module.exports = {
   bootstrapField,
   createSignUpForm,
   createLoginForm,
   createAddProductForm,
   createSearchForm,
+  createOrderSearchForm,
 };

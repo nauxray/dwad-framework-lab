@@ -1,39 +1,36 @@
 const express = require("express");
 const router = express.Router();
 
-const { getShop } = require("../dal/shop");
-const { getOrdersByShopId } = require("../dal/orders");
 const { checkIfAuthenticated } = require("../middlewares/auth");
+const { handleOrdersSearchForm } = require("../middlewares/forms");
 
-router.get("/", checkIfAuthenticated, async (req, res) => {
-  try {
-    const user = req.session.user;
-    const shopId = (await getShop(user.id)).get("id");
-    const orderPromises = await getOrdersByShopId(shopId);
-    let orders = await Promise.all(orderPromises);
-    orders = orders.map((i) => i.toJSON()).filter((i) => i.status !== "UNPAID");
-    orders.map((i) => {
-      const filtered = [];
-
-      i.orderItems.map((j) => {
-        j.qty = i.orderItems.filter(
-          (k) => k.product_id === j.product_id
-        ).length;
-
-        if (!filtered.filter((f) => f.product_id === j.product_id).length) {
-          filtered.push(j);
-        }
-      });
-
-      i.orderItems = filtered;
-      return i;
-    });
-
-    res.render("orders/index", { orders });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send([]);
+router.get(
+  "/",
+  checkIfAuthenticated,
+  handleOrdersSearchForm,
+  async (req, res) => {
+    try {
+      switch (res.locals.status) {
+        case "success":
+          res.render("orders/index", {
+            orders: res.locals.orders,
+            form: res.locals.form,
+          });
+          break;
+        case "error":
+        case "empty":
+          res.render("orders/index", {
+            orders: res.locals.orders,
+            form: res.locals.form,
+          });
+          break;
+      }
+    } catch (err) {
+      console.log(err);
+      req.flash("error_messages", "Something went wrong!");
+      res.redirect("/");
+    }
   }
-});
+);
 
 module.exports = router;

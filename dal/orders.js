@@ -77,18 +77,55 @@ const getOrderById = async (id) => {
   return order;
 };
 
-const getOrdersByShopId = async (shopId) => {
-  const shopProductIds = (
-    await Product.query().where({ shop_id: shopId }).select("id")
-  ).map((i) => i.id);
+const getOrdersByShopId = async (
+  shopId,
+  queryCb = null,
+  orderId = false,
+  status = null
+) => {
+  let shopProductIds;
+
+  if (queryCb) {
+    shopProductIds = (await Product.query(queryCb).fetchAll({ require: false }))
+      .toJSON()
+      .map((i) => i.id);
+  } else {
+    shopProductIds = (
+      await Product.query().where({ shop_id: shopId }).select("id")
+    ).map((i) => i.id);
+  }
 
   const orderIds = (
-    await OrderItem.query().whereIn("product_id", shopProductIds).select()
-  ).map((i) => i.order_id);
+    await OrderItem.query().whereIn("product_id", shopProductIds)
+  )
 
-  const orders = [];
+    .map((i) => i.order_id)
+    .filter((i) => (!!orderId ? i === orderId : true));
+
+  const orderPromises = [];
   Array.from(new Set(orderIds)).forEach((id) => {
-    orders.push(getOrderById(id));
+    orderPromises.push(getOrderById(id));
+  });
+
+  let orders = await Promise.all(orderPromises);
+
+  orders = orders
+    .map((i) => i.toJSON())
+    .filter((i) => (!!status ? i.status === status : i.status !== "UNPAID"));
+
+  orders.map((i) => {
+    const filtered = [];
+
+    i.orderItems.map((j) => {
+      j.qty = i.orderItems.filter((k) => k.product_id === j.product_id).length;
+
+      if (!filtered.filter((f) => f.product_id === j.product_id).length) {
+        filtered.push(j);
+      }
+    });
+
+    i.orderItems = filtered;
+    return i;
   });
 
   return orders;

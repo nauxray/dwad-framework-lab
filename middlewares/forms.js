@@ -1,4 +1,5 @@
 const { getBrands } = require("../dal/brands");
+const { getOrdersByShopId } = require("../dal/orders");
 const { getAllSeries } = require("../dal/series");
 const { getShop } = require("../dal/shop");
 const {
@@ -6,6 +7,7 @@ const {
   createSignUpForm,
   bootstrapField,
   createSearchForm,
+  createOrderSearchForm,
 } = require("../forms");
 const { User, Product } = require("../models");
 const { getHashedPassword } = require("../utils/getHashedPw");
@@ -173,8 +175,63 @@ const handleProductsSearchForm = async (req, res, next) => {
   });
 };
 
+const handleOrdersSearchForm = async (req, res, next) => {
+  const brands = (await getBrands()).map((brand) => [brand.id, brand.name]);
+  const allSeries = (await getAllSeries()).map((series) => [
+    series.id,
+    series.name,
+  ]);
+  allSeries.unshift([0, "----"]);
+  brands.unshift([0, "----"]);
+
+  const shopId = (await getShop(req.session.user.id)).get("id");
+  const searchForm = createOrderSearchForm(brands, allSeries);
+
+  searchForm.handle(req, {
+    empty: async (form) => {
+      res.locals.status = "empty";
+      res.locals.form = form.toHTML(bootstrapField);
+      res.locals.orders = await getOrdersByShopId(shopId);
+      next();
+    },
+    error: async (form) => {
+      res.locals.status = "error";
+      res.locals.form = form.toHTML(bootstrapField);
+      res.locals.orders = await getOrdersByShopId(shopId);
+      next();
+    },
+    success: async (form) => {
+      const data = form.data;
+      console.log(data);
+      const queryCb = (qb) => {
+        qb.where("shop_id", "=", shopId);
+        if (data.product_name) {
+          qb.whereILike("name", `%${data.product_name}%`);
+        }
+        if (data.brand_id && data.brand_id != "0") {
+          qb.where("brand_id", "=", data.brand_id);
+        }
+        if (data.series_id && data.series_id != "0") {
+          qb.where("series_id", "=", data.series_id);
+        }
+      };
+
+      res.locals.status = "success";
+      res.locals.orders = await getOrdersByShopId(
+        shopId,
+        queryCb,
+        +data.order_id,
+        data.status
+      );
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+  });
+};
+
 module.exports = {
   handleLoginForm,
   handleSignupForm,
   handleProductsSearchForm,
+  handleOrdersSearchForm,
 };
