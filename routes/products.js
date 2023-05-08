@@ -4,71 +4,49 @@ const {
   bootstrapField,
   createSearchForm,
 } = require("../forms");
-const { checkIfAuthenticated } = require("../middlewares");
+const { checkIfAuthenticated } = require("../middlewares/auth");
 const { Product } = require("../models");
 const router = express.Router();
 
 const { getAllSeries } = require("../dal/series");
 const { getBrands } = require("../dal/brands");
 const { getProductById, getShopProducts } = require("../dal/products");
+const { handleProductsSearchForm } = require("../middlewares/forms");
 
-router.get("/", checkIfAuthenticated, async (req, res) => {
-  try {
-    const userId = req.session.user.id;
-    const shopProducts = (await getShopProducts(req.session.user.id)).toJSON();
-    const brands = (await getBrands()).map((brand) => [brand.id, brand.name]);
-    const allSeries = (await getAllSeries()).map((series) => [
-      series.id,
-      series.name,
-    ]);
-    allSeries.unshift([0, "----"]);
-    brands.unshift([0, "----"]);
+const cloudinaryName = process.env.CLOUDINARY_NAME;
+const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
+const cloudinaryPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
 
-    const searchForm = createSearchForm(brands, allSeries);
+router.get(
+  "/",
+  checkIfAuthenticated,
+  handleProductsSearchForm,
+  async (req, res) => {
+    try {
+      const userId = req.session.user.id;
+      const shopProducts = (await getShopProducts(userId)).toJSON();
 
-    searchForm.handle(req, {
-      empty: async (form) => {
-        res.render("products/index", {
-          products: shopProducts,
-          form: form.toHTML(bootstrapField),
-        });
-      },
-      error: async (form) => {
-        res.render("products/index", {
-          products: shopProducts,
-          form: form.toHTML(bootstrapField),
-        });
-      },
-      success: async (form) => {
-        const data = form.data;
-        const products = await Product.query((qb) => {
-          qb.where("shop_id", "=", userId);
-          if (data.name) {
-            qb.whereILike("name", `%${data.name}%`);
-          }
-          if (data.brand_id && data.brand_id != "0") {
-            qb.where("brand_id", "=", data.brand_id);
-          }
-          if (data.series_id && data.series_id != "0") {
-            qb.where("series_id", "=", data.series_id);
-          }
-          if (data.min_price) {
-            qb.andWhere("price", ">=", +data.min_price);
-          }
-          if (data.max_price) {
-            qb.andWhere("price", "<=", +data.max_price);
-          }
-        }).fetchAll({ withRelated: ["brand", "series"], required: false });
-        res.render("products/index", {
-          products: products.toJSON(),
-          form: form.toHTML(bootstrapField),
-        });
-      },
-    });
-  } catch (err) {
-    res.status(500).send([]);
+      switch (res.locals.status) {
+        case "success":
+          res.render("products/index", {
+            products: res.locals.products,
+            form: res.locals.form,
+          });
+          break;
+        case "error":
+        case "empty":
+          res.render("products/index", {
+            products: shopProducts,
+            form: res.locals.form,
+          });
+          break;
+      }
+    } catch (err) {
+      req.flash("error_messages", "Something went wrong!");
+      res.redirect("/");
+    }
   }
-});
+);
 
 router.get("/add", checkIfAuthenticated, async (req, res) => {
   try {
@@ -77,9 +55,9 @@ router.get("/add", checkIfAuthenticated, async (req, res) => {
     const addProductForm = createAddProductForm(brands, allSeries);
     res.render("products/add", {
       form: addProductForm.toHTML(bootstrapField),
-      cloudinaryName: process.env.CLOUDINARY_NAME,
-      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-      cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+      cloudinaryName,
+      cloudinaryApiKey,
+      cloudinaryPreset,
     });
   } catch (err) {
     res.status(500).send([]);
@@ -108,17 +86,17 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName: process.env.CLOUDINARY_NAME,
-          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+          cloudinaryName,
+          cloudinaryApiKey,
+          cloudinaryPreset,
         });
       },
       empty: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName: process.env.CLOUDINARY_NAME,
-          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+          cloudinaryName,
+          cloudinaryApiKey,
+          cloudinaryPreset,
         });
       },
     });
@@ -145,9 +123,9 @@ router.get("/edit/:id", checkIfAuthenticated, async (req, res) => {
     res.render("products/edit", {
       product: product.toJSON(),
       form: editProductForm.toHTML(bootstrapField),
-      cloudinaryName: process.env.CLOUDINARY_NAME,
-      cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-      cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+      cloudinaryName,
+      cloudinaryApiKey,
+      cloudinaryPreset,
     });
   } catch (err) {
     res.sendStatus(500);
@@ -176,17 +154,17 @@ router.post("/edit/:id", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName: process.env.CLOUDINARY_NAME,
-          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+          cloudinaryName,
+          cloudinaryApiKey,
+          cloudinaryPreset,
         });
       },
       empty: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName: process.env.CLOUDINARY_NAME,
-          cloudinaryApiKey: process.env.CLOUDINARY_API_KEY,
-          cloudinaryPreset: process.env.CLOUDINARY_UPLOAD_PRESET,
+          cloudinaryName,
+          cloudinaryApiKey,
+          cloudinaryPreset,
         });
       },
     });

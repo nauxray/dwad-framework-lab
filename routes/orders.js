@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
 
-const { checkIfAuthenticated } = require("../middlewares");
 const { getShop } = require("../dal/shop");
 const { getOrdersByShopId } = require("../dal/orders");
+const { checkIfAuthenticated } = require("../middlewares/auth");
 
 router.get("/", checkIfAuthenticated, async (req, res) => {
   try {

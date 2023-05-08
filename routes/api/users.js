@@ -6,7 +6,10 @@ const { User } = require("../../models");
 const { getUserById, getShopById } = require("../../dal/users");
 const { getHashedPassword } = require("../../utils/getHashedPw");
 const { generateAccessToken } = require("../../utils/jwtUtils");
-const { handleLoginForm, handleSignupForm } = require("../../middlewares");
+const {
+  handleLoginForm,
+  handleSignupForm,
+} = require("../../middlewares/forms");
 
 router.get("/:id/profile", async (req, res) => {
   try {

@@ -1,5 +1,5 @@
 const express = require("express");
-const { authenticateToken } = require("../../middlewares");
+const { authenticateToken } = require("../../middlewares/auth");
 const { getUserOrders } = require("../../dal/orders");
 const router = express.Router();
 

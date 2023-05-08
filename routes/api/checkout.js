@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 require("dotenv").config();
-const { authenticateToken } = require("../../middlewares");
+const { authenticateToken } = require("../../middlewares/auth");
 const { createCheckoutSession } = require("../../services/checkout");
 const { getUserCart } = require("../../dal/cart");
 const {

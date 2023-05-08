@@ -1,37 +1,15 @@
-const jwt = require("jsonwebtoken");
+const { getBrands } = require("../dal/brands");
+const { getAllSeries } = require("../dal/series");
+const { getShop } = require("../dal/shop");
 const {
   createLoginForm,
   createSignUpForm,
   bootstrapField,
+  createSearchForm,
 } = require("../forms");
-const { User } = require("../models");
+const { User, Product } = require("../models");
 const { getHashedPassword } = require("../utils/getHashedPw");
 require("dotenv").config();
-
-const checkIfAuthenticated = (req, res, next) => {
-  if (req.session.user) {
-    next();
-  } else {
-    req.flash("error_messages", "You need to sign in to access this page");
-    res.redirect("/users/login");
-  }
-};
-
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, user) => {
-    if (err) {
-      console.log(err);
-      return res.sendStatus(403);
-    }
-    req.user = user;
-    next();
-  });
-};
 
 const handleLoginForm = async (req, res, next) => {
   const loginForm = createLoginForm();
@@ -142,9 +120,61 @@ const handleSignupForm = async (req, res, next) => {
   });
 };
 
+const handleProductsSearchForm = async (req, res, next) => {
+  const brands = (await getBrands()).map((brand) => [brand.id, brand.name]);
+  const allSeries = (await getAllSeries()).map((series) => [
+    series.id,
+    series.name,
+  ]);
+  allSeries.unshift([0, "----"]);
+  brands.unshift([0, "----"]);
+
+  const searchForm = createSearchForm(brands, allSeries);
+
+  searchForm.handle(req, {
+    empty: async (form) => {
+      res.locals.status = "empty";
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+    error: async (form) => {
+      res.locals.status = "error";
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+    success: async (form) => {
+      const data = form.data;
+      const shopId = (await getShop(req.session.user.id)).get("id");
+
+      const products = await Product.query((qb) => {
+        qb.where("shop_id", "=", shopId);
+        if (data.name) {
+          qb.whereILike("name", `%${data.name}%`);
+        }
+        if (data.brand_id && data.brand_id != "0") {
+          qb.where("brand_id", "=", data.brand_id);
+        }
+        if (data.series_id && data.series_id != "0") {
+          qb.where("series_id", "=", data.series_id);
+        }
+        if (data.min_price) {
+          qb.andWhere("price", ">=", +data.min_price);
+        }
+        if (data.max_price) {
+          qb.andWhere("price", "<=", +data.max_price);
+        }
+      }).fetchAll({ withRelated: ["brand", "series"], required: false });
+
+      res.locals.status = "success";
+      res.locals.products = products.toJSON();
+      res.locals.form = form.toHTML(bootstrapField);
+      next();
+    },
+  });
+};
+
 module.exports = {
-  checkIfAuthenticated,
-  authenticateToken,
   handleLoginForm,
   handleSignupForm,
+  handleProductsSearchForm,
 };

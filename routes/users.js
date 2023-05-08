@@ -7,11 +7,8 @@ const {
 const router = express.Router();
 
 const { getUserById } = require("../dal/users");
-const {
-  checkIfAuthenticated,
-  handleLoginForm,
-  handleSignupForm,
-} = require("../middlewares");
+const { handleLoginForm, handleSignupForm } = require("../middlewares/forms");
+const { checkIfAuthenticated } = require("../middlewares/auth");
 
 router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
   try {
