@@ -1,4 +1,5 @@
 const { Order, OrderItem, Product } = require("../models");
+const { searchProductByName } = require("./products");
 
 const getOrderBySessionId = async (sessionId) => {
   const order = await Order.query({
@@ -100,7 +101,6 @@ const getOrdersByShopId = async (
   const orderIds = (
     await OrderItem.query().whereIn("product_id", shopProductIds)
   )
-
     .map((i) => i.order_id)
     .filter((i) => (!!orderId ? i === orderId : true));
 
@@ -133,6 +133,37 @@ const getOrdersByShopId = async (
   return orders;
 };
 
+const searchOrders = async (userId, searchTerm) => {
+  let orders = (await getUserOrders(userId)).toJSON();
+  orders.map((i) => {
+    const filtered = [];
+
+    i.orderItems.map((j) => {
+      j.qty = i.orderItems.filter((k) => k.product_id === j.product_id).length;
+
+      if (!filtered.filter((f) => f.product_id === j.product_id).length) {
+        filtered.push(j);
+      }
+    });
+
+    i.orderItems = filtered;
+    return i;
+  });
+
+  const matchingProducts = (await searchProductByName(searchTerm)).toJSON();
+  const productIds = matchingProducts.map((i) => i.id);
+
+  orders = orders.filter((i) => {
+    return (
+      i.id === +searchTerm ||
+      !!i.orderItems.filter((item) => productIds.includes(item.product_id))
+        .length
+    );
+  });
+
+  return orders;
+};
+
 module.exports = {
   getOrderById,
   getOrderBySessionId,
@@ -140,4 +171,5 @@ module.exports = {
   getOrderProducts,
   getUserOrders,
   getOrdersByShopId,
+  searchOrders,
 };

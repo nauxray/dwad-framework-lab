@@ -1,11 +1,11 @@
 const express = require("express");
 const { authenticateToken } = require("../../middlewares/auth");
-const { getUserOrders } = require("../../dal/orders");
+const { getUserOrders, searchOrders } = require("../../dal/orders");
 const router = express.Router();
 
-router.get("/user/:userId", authenticateToken, async (req, res) => {
+router.get("/user", authenticateToken, async (req, res) => {
   try {
-    const userOrders = (await getUserOrders(req.params.userId)).toJSON();
+    const userOrders = (await getUserOrders(req.user.userId)).toJSON();
     res.send(userOrders);
   } catch (err) {
     console.log(err);
@@ -13,11 +13,10 @@ router.get("/user/:userId", authenticateToken, async (req, res) => {
   }
 });
 
-router.post("/search/:userId", authenticateToken, async (req, res) => {
+router.post("/search", authenticateToken, async (req, res) => {
   try {
-    console.log(req.body);
-    const userOrders = (await getUserOrders(req.params.userId)).toJSON();
-    res.send(userOrders);
+    const orders = await searchOrders(req.user.userId, req.body.searchTerm);
+    res.send(orders);
   } catch (err) {
     console.log(err);
     res.sendStatus(500);

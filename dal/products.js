@@ -58,4 +58,15 @@ const getProductById = async (id) => {
   return product;
 };
 
-module.exports = { getShopProducts, getProductById };
+const searchProductByName = async (name) => {
+  const products = await Product.query((query) => {
+    query.whereILike("name", `%${name}%`);
+  }).fetchAll({
+    withRelated: ["brand", "series"],
+    require: false,
+  });
+
+  return products ?? [];
+};
+
+module.exports = { getShopProducts, getProductById, searchProductByName };
