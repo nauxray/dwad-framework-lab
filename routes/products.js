@@ -17,6 +17,7 @@ const { getShop } = require("../dal/shop");
 const cloudinaryName = process.env.CLOUDINARY_NAME;
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
 const cloudinaryPreset = process.env.CLOUDINARY_UPLOAD_PRESET;
+const cloudinary = { cloudinaryName, cloudinaryApiKey, cloudinaryPreset };
 
 router.get(
   "/",
@@ -56,9 +57,7 @@ router.get("/add", checkIfAuthenticated, async (req, res) => {
     const addProductForm = createAddProductForm(brands, allSeries);
     res.render("products/add", {
       form: addProductForm.toHTML(bootstrapField),
-      cloudinaryName,
-      cloudinaryApiKey,
-      cloudinaryPreset,
+      ...cloudinary,
     });
   } catch (err) {
     res.status(500).send([]);
@@ -125,9 +124,7 @@ router.get("/edit/:id", checkIfAuthenticated, async (req, res) => {
     res.render("products/edit", {
       product: product.toJSON(),
       form: editProductForm.toHTML(bootstrapField),
-      cloudinaryName,
-      cloudinaryApiKey,
-      cloudinaryPreset,
+      ...cloudinary,
     });
   } catch (err) {
     res.sendStatus(500);
