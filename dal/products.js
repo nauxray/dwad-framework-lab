@@ -36,7 +36,6 @@ const getProductById = async (id) => {
       "brand",
       "series",
       "tags",
-      "materials",
       {
         shop: (query) => {
           query

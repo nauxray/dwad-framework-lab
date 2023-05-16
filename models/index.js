@@ -14,9 +14,6 @@ const Product = bookshelf.model("Product", {
   tags() {
     return this.belongsToMany("Tag");
   },
-  materials() {
-    return this.belongsToMany("Material");
-  },
   cartItems() {
     return this.belongsToMany("CartItem");
   },
@@ -39,13 +36,6 @@ const Brand = bookshelf.model("Brand", {
   tableName: "brands",
   products() {
     return this.hasMany("Product");
-  },
-});
-
-const Material = bookshelf.model("Material", {
-  tableName: "materials",
-  products() {
-    return this.belongsToMany("Product");
   },
 });
 
@@ -111,7 +101,6 @@ module.exports = {
   CartItem,
   Brand,
   Shop,
-  Material,
   Order,
   OrderItem,
   Series,
