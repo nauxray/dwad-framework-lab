@@ -32,6 +32,12 @@
             <span>Quantity: {{this.quantity}} left</span>
             <span>Sales made: {{this.sales}} sold</span>
             <span>Description: {{this.description}}</span>
+            <div>
+              Tags:
+              {{#each this.tags}}
+                <span class="badge bg-primary">{{this.name}}</span>
+              {{/each}}
+            </div>
             <span>Created at: {{this.created_at}}</span>
           </div>
           <div
