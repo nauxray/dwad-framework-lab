@@ -13,17 +13,17 @@ router.get("/", async (req, res) => {
       if (queryKeys.includes("name")) {
         qb.whereILike("name", `%${reqQuery.name}%`);
       }
-      if (queryKeys.includes("quantity") && parseInt(reqQuery.quantity)) {
-        qb.andWhere("quantity", ">=", parseInt(reqQuery.quantity));
+      if (queryKeys.includes("brand") && +reqQuery.brand) {
+        qb.andWhere("brand_id", "=", +reqQuery.brand);
       }
-      if (queryKeys.includes("minPrice") && parseInt(reqQuery.minPrice)) {
-        qb.andWhere("price", ">=", parseInt(reqQuery.minPrice));
+      if (queryKeys.includes("minPrice") && +reqQuery.minPrice) {
+        qb.andWhere("price", ">=", +reqQuery.minPrice);
       }
-      if (queryKeys.includes("maxPrice") && parseInt(reqQuery.maxPrice)) {
-        qb.andWhere("price", "<=", parseInt(reqQuery.maxPrice));
+      if (queryKeys.includes("maxPrice") && +reqQuery.maxPrice) {
+        qb.andWhere("price", "<=", +reqQuery.maxPrice);
       }
-      if (queryKeys.includes("limit") && parseInt(reqQuery.limit)) {
-        qb.limit(parseInt(reqQuery.limit));
+      if (queryKeys.includes("limit") && +reqQuery.limit) {
+        qb.limit(+reqQuery.limit);
       }
       if (
         queryKeys.includes("sortBy") &&

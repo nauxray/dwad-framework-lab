@@ -74,10 +74,10 @@ const api = {
   shop: require("./routes/api/shop"),
   checkout: require("./routes/api/checkout"),
   orders: require("./routes/api/orders"),
+  brands: require("./routes/api/brands"),
 };
 
 const productRoutes = require("./routes/products");
-const brandRoutes = require("./routes/brands");
 const materialRoutes = require("./routes/materials");
 const orderRoutes = require("./routes/orders");
 const seriesRoutes = require("./routes/series");
@@ -87,7 +87,6 @@ const cloudinaryRoutes = require("./routes/cloudinary");
 
 async function main() {
   app.use("/products", productRoutes);
-  app.use("/brands", brandRoutes);
   app.use("/materials", materialRoutes);
   app.use("/orders", orderRoutes);
   app.use("/series", seriesRoutes);
