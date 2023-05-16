@@ -60,7 +60,8 @@ router.get("/add", checkIfAuthenticated, async (req, res) => {
       ...cloudinary,
     });
   } catch (err) {
-    res.status(500).send([]);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 
@@ -87,22 +88,19 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName,
-          cloudinaryApiKey,
-          cloudinaryPreset,
+          ...cloudinary,
         });
       },
       empty: (form) => {
         res.render("products/add", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName,
-          cloudinaryApiKey,
-          cloudinaryPreset,
+          ...cloudinary,
         });
       },
     });
   } catch (err) {
-    res.status(500).send([]);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 
@@ -153,17 +151,13 @@ router.post("/edit/:id", checkIfAuthenticated, async (req, res) => {
       error: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName,
-          cloudinaryApiKey,
-          cloudinaryPreset,
+          ...cloudinary,
         });
       },
       empty: (form) => {
         res.render("products/edit", {
           form: form.toHTML(bootstrapField),
-          cloudinaryName,
-          cloudinaryApiKey,
-          cloudinaryPreset,
+          ...cloudinary,
         });
       },
     });
@@ -179,7 +173,8 @@ router.get("/delete/:id", checkIfAuthenticated, async (req, res) => {
       product,
     });
   } catch (err) {
-    res.status(500).send([]);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 

@@ -16,7 +16,8 @@ router.get("/:id/profile/view", checkIfAuthenticated, async (req, res) => {
     if (userInfo) res.render("users/profile", { userInfo });
     else res.render("users/login");
   } catch (err) {
-    res.sendStatus(500);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 
@@ -30,7 +31,8 @@ router.get("/login", async (req, res) => {
       form: loginForm.toHTML(bootstrapField),
     });
   } catch (err) {
-    res.sendStatus(500);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 
@@ -73,7 +75,8 @@ router.get("/create", async (req, res) => {
       form: signUpForm.toHTML(bootstrapField),
     });
   } catch (err) {
-    res.sendStatus(500);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 
@@ -94,8 +97,8 @@ router.post("/create", handleSignupForm, async (req, res) => {
         break;
     }
   } catch (err) {
-    if (err?.message === "EmptyResponse") res.status(404).send([]);
-    res.sendStatus(500);
+    req.flash("error_messages", "Something went wrong!");
+    res.redirect("/");
   }
 });
 

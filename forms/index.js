@@ -186,6 +186,30 @@ const createOrderUpdateForm = (orderIds, statusChoices) => {
   });
 };
 
+const createTagForm = () => {
+  return forms.create({
+    name: fields.string({
+      required: true,
+      errorAfterField: true,
+    }),
+  });
+};
+
+const createSeriesForm = () => {
+  return forms.create({
+    name: fields.string({
+      required: true,
+      errorAfterField: true,
+    }),
+    release_date: fields.string({
+      label: "Release Date",
+      required: true,
+      errorAfterField: true,
+      widget: widgets.date(),
+    }),
+  });
+};
+
 module.exports = {
   bootstrapField,
   createSignUpForm,
@@ -194,4 +218,6 @@ module.exports = {
   createSearchForm,
   createOrderSearchForm,
   createOrderUpdateForm,
+  createTagForm,
+  createSeriesForm,
 };

@@ -1,0 +1,17 @@
+{{#extends "base"}}
+
+  {{#block "content"}}
+    {{#if user}}
+      <h2>Add Tag</h2>
+    {{else}}
+      <h2>Please login first!</h2>
+    {{/if}}
+
+    <form method="post">
+      <input type="hidden" name="_csrf" value="{{csrfToken}}" />
+      {{{form}}}
+      <input type="submit" value="Add" class="btn btn-primary mt-2" />
+    </form>
+  {{/block}}
+
+{{/extends}}
