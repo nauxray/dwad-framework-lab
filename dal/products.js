@@ -7,6 +7,7 @@ const getShopProducts = async (shop_id) => {
     withRelated: [
       "brand",
       "series",
+      "tags",
       {
         shop: (query) => {
           query
@@ -61,7 +62,7 @@ const searchProductByName = async (name) => {
   const products = await Product.query((query) => {
     query.whereILike("name", `%${name}%`);
   }).fetchAll({
-    withRelated: ["brand", "series"],
+    withRelated: ["brand", "series", "tags"],
     require: false,
   });
 

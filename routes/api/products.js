@@ -34,7 +34,7 @@ router.get("/", async (req, res) => {
           reqQuery.sortBy.split(":")[1]
         );
       }
-    }).fetchAll({ withRelated: ["brand", "series"], required: false });
+    }).fetchAll({ withRelated: ["brand", "series", "tags"], required: false });
     res.send(products.toJSON());
   } catch (err) {
     res.sendStatus(500);

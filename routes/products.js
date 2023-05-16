@@ -1,9 +1,5 @@
 const express = require("express");
-const {
-  createAddProductForm,
-  bootstrapField,
-  createSearchForm,
-} = require("../forms");
+const { createAddProductForm, bootstrapField } = require("../forms");
 const { checkIfAuthenticated } = require("../middlewares/auth");
 const { Product } = require("../models");
 const router = express.Router();
@@ -13,6 +9,7 @@ const { getBrands } = require("../dal/brands");
 const { getProductById, getShopProducts } = require("../dal/products");
 const { handleProductsSearchForm } = require("../middlewares/forms");
 const { getShop } = require("../dal/shop");
+const { getTags } = require("../dal/tags");
 
 const cloudinaryName = process.env.CLOUDINARY_NAME;
 const cloudinaryApiKey = process.env.CLOUDINARY_API_KEY;
@@ -54,7 +51,8 @@ router.get("/add", checkIfAuthenticated, async (req, res) => {
   try {
     const brands = await getBrands();
     const allSeries = await getAllSeries();
-    const addProductForm = createAddProductForm(brands, allSeries);
+    const tags = await getTags();
+    const addProductForm = createAddProductForm(brands, allSeries, tags);
     res.render("products/add", {
       form: addProductForm.toHTML(bootstrapField),
       ...cloudinary,
@@ -69,20 +67,26 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
   try {
     const brands = await getBrands();
     const allSeries = await getAllSeries();
-    const addProductForm = createAddProductForm(brands, allSeries);
+    const tags = await getTags();
+    const addProductForm = createAddProductForm(brands, allSeries, tags);
     const shopId = (await getShop(req.session.user.id)).get("id");
 
     addProductForm.handle(req, {
       success: async (form) => {
         const newProd = new Product();
+        const { tags, ...data } = form.data;
         newProd.set({
-          ...form.data,
+          ...data,
           sales: 0,
           created_at: new Date(),
           shop_id: shopId,
         });
 
         await newProd.save();
+        if (tags) {
+          await newProd.tags().attach(tags.split(","));
+        }
+
         res.redirect("/products");
       },
       error: (form) => {
@@ -109,7 +113,8 @@ router.get("/edit/:id", checkIfAuthenticated, async (req, res) => {
     const product = await getProductById(req.params.id);
     const brands = await getBrands();
     const allSeries = await getAllSeries();
-    const editProductForm = createAddProductForm(brands, allSeries);
+    const tags = await getTags();
+    const editProductForm = createAddProductForm(brands, allSeries, tags);
 
     editProductForm.fields.name.value = product.get("name");
     editProductForm.fields.price.value = product.get("price");
@@ -118,6 +123,8 @@ router.get("/edit/:id", checkIfAuthenticated, async (req, res) => {
     editProductForm.fields.brand_id.value = product.get("brand");
     editProductForm.fields.series_id.value = product.get("series");
     editProductForm.fields.img_url.value = product.get("img_url");
+    const selectedTags = await product.related("tags").pluck("id");
+    editProductForm.fields.tags.value = selectedTags;
 
     res.render("products/edit", {
       product: product.toJSON(),
@@ -133,19 +140,28 @@ router.post("/edit/:id", checkIfAuthenticated, async (req, res) => {
   try {
     const brands = await getBrands();
     const allSeries = await getAllSeries();
-    const editProductForm = createAddProductForm(brands, allSeries);
+    const tags = await getTags();
+    const editProductForm = createAddProductForm(brands, allSeries, tags);
 
     editProductForm.handle(req, {
       success: async (form) => {
         const updated = await getProductById(req.params.id);
+        const { tags, ...data } = form.data;
         updated.set({
-          ...form.data,
+          ...data,
           sales: updated.get("sales"),
           created_at: updated.get("created_at"),
           shop_id: updated.get("shop_id"),
         });
 
         await updated.save();
+
+        const tagIds = tags.split(",");
+        const existingTagIds = await updated.related("tags").pluck("id");
+        const toRemove = existingTagIds.filter((id) => !tagIds.includes(id));
+
+        await updated.tags().detach(toRemove);
+        await updated.tags().attach(tagIds);
         res.redirect("/products");
       },
       error: (form) => {
