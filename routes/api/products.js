@@ -16,14 +16,14 @@ router.get("/", async (req, res) => {
       if (queryKeys.includes("brand") && +reqQuery.brand) {
         qb.andWhere("brand_id", "=", +reqQuery.brand);
       }
+      if (queryKeys.includes("series") && +reqQuery.series) {
+        qb.andWhere("series_id", "=", +reqQuery.series);
+      }
       if (queryKeys.includes("minPrice") && +reqQuery.minPrice) {
         qb.andWhere("price", ">=", +reqQuery.minPrice);
       }
       if (queryKeys.includes("maxPrice") && +reqQuery.maxPrice) {
         qb.andWhere("price", "<=", +reqQuery.maxPrice);
-      }
-      if (queryKeys.includes("limit") && +reqQuery.limit) {
-        qb.limit(+reqQuery.limit);
       }
       if (
         queryKeys.includes("sortBy") &&

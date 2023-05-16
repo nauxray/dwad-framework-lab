@@ -75,12 +75,12 @@ const api = {
   checkout: require("./routes/api/checkout"),
   orders: require("./routes/api/orders"),
   brands: require("./routes/api/brands"),
+  series: require("./routes/api/series"),
 };
 
 const productRoutes = require("./routes/products");
 const materialRoutes = require("./routes/materials");
 const orderRoutes = require("./routes/orders");
-const seriesRoutes = require("./routes/series");
 const tagsRoutes = require("./routes/tags");
 const userRoutes = require("./routes/users");
 const cloudinaryRoutes = require("./routes/cloudinary");
@@ -89,7 +89,6 @@ async function main() {
   app.use("/products", productRoutes);
   app.use("/materials", materialRoutes);
   app.use("/orders", orderRoutes);
-  app.use("/series", seriesRoutes);
   app.use("/tags", tagsRoutes);
   app.use("/users", userRoutes);
   app.use("/cloudinary", cloudinaryRoutes);

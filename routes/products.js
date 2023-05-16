@@ -77,7 +77,7 @@ router.post("/add", checkIfAuthenticated, async (req, res) => {
         newProd.set({
           ...form.data,
           sales: 0,
-          created_at: new Date().toJSON().split("T")[0],
+          created_at: new Date(),
           shop_id: shopId,
         });
 
