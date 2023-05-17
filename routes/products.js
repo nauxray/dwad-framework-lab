@@ -161,7 +161,9 @@ router.post("/edit/:id", checkIfAuthenticated, async (req, res) => {
         const toRemove = existingTagIds.filter((id) => !tagIds.includes(id));
 
         await updated.tags().detach(toRemove);
-        await updated.tags().attach(tagIds);
+        if (tagIds.filter((i) => i.length > 0).length > 0) {
+          await updated.tags().attach(tagIds);
+        }
         res.redirect("/products");
       },
       error: (form) => {

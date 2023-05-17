@@ -108,13 +108,14 @@ const createAddProductForm = (brands = [], series = [], tags) => {
       choices: series.map((item) => [item.id, item.name]),
     }),
     tags: fields.string({
-      required: true,
+      required: false,
       errorAfterField: true,
       cssClasses: { label: ["form-label"] },
       widget: widgets.multipleSelect(),
       choices: tags.map((item) => [item.id, item.name]),
     }),
     img_url: fields.string({
+      required: true,
       widget: widgets.hidden(),
       cssClasses: { label: ["form-label"] },
     }),
