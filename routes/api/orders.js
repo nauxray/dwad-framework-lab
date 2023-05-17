@@ -5,7 +5,7 @@ const {
   searchOrders,
   getOrderById,
 } = require("../../dal/orders");
-const { cancelOrder } = require("../../services/orders");
+const { cancelOrder, updateOrderStatus } = require("../../services/orders");
 const router = express.Router();
 
 router.get("/user", authenticateToken, async (req, res) => {
@@ -35,6 +35,21 @@ router.delete("/:id", authenticateToken, async (req, res) => {
       res.send("Forbidden");
     } else {
       await cancelOrder(req.params.id);
+      res.sendStatus(204);
+    }
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(500);
+  }
+});
+
+router.get("/received/:id", authenticateToken, async (req, res) => {
+  try {
+    const order = (await getOrderById(req.params.id)).toJSON();
+    if (order.user_id !== req.user.userId || order.status !== "SHIPPED") {
+      res.send("Forbidden");
+    } else {
+      await updateOrderStatus(req.params.id, "COMPLETED");
       res.sendStatus(204);
     }
   } catch (err) {
