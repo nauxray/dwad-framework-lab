@@ -1,4 +1,4 @@
-const { getOrderItems } = require("../dal/orders");
+const { getOrderItems, getOrderById } = require("../dal/orders");
 const { Order, OrderItem } = require("../models");
 const { deductProductQty, updateProductSales } = require("./product");
 
@@ -53,9 +53,15 @@ const updatePaidOrder = async (orderId) => {
   }
 };
 
+const cancelOrder = async (orderId) => {
+  const order = await getOrderById(orderId);
+  await order.destroy();
+};
+
 module.exports = {
   createOrder,
   updateSessionId,
   updateOrderStatus,
   updatePaidOrder,
+  cancelOrder,
 };
